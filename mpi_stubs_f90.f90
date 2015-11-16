@@ -111,6 +111,10 @@ subroutine mpi_allgather ( data1, nsend, sendtype,data2, nrecv, recvtype, &
     call mpi_copy_double_precision ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_integer ) then
     call mpi_copy_integer ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer4 ) then
+    call mpi_copy_integer4 ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer8 ) then
+    call mpi_copy_integer8 ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_real ) then
     call mpi_copy_real ( data1, data2, nsend, ierror )
   else
@@ -182,6 +186,10 @@ subroutine mpi_allgatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, &
     call mpi_copy_double_precision ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_integer ) then
     call mpi_copy_integer ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer4 ) then
+    call mpi_copy_integer4 ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer8 ) then
+    call mpi_copy_integer8 ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_real ) then
     call mpi_copy_real ( data1, data2, nsend, ierror )
   else
@@ -961,6 +969,104 @@ subroutine mpi_copy_integer ( data1, data2, n, ierror )
 
   integer data1(n)
   integer data2(n)
+  integer ierror
+
+  ierror = MPI_SUCCESS
+
+  data2(1:n) = data1(1:n)
+
+  return
+end
+subroutine mpi_copy_integer4 ( data1, data2, n, ierror )
+
+!*****************************************************************************80
+!
+!! MPI_COPY_INTEGER4 copies an integer4 vector.
+!
+!  Discussion:
+!
+!    This routine is not part of the MPI standard.  However, it is
+!    needed by other routines which do emulate standard MPI routines.
+!
+!  Licensing:
+!
+!    This code is distributed under the GNU LGPL license.
+!
+!  Modified:
+!
+!    16 November 2015
+!
+!  Author:
+!
+!    R.W. Ogburn
+!
+!  Parameters:
+!
+!    Input, integer*4 DATA1(N), the data to be copied.
+!
+!    Output, integer*4 DATA2(N), the copied data.
+!
+!    Input, integer N, the number of items of data.
+!
+!    Output, integer IERROR, is nonzero if an error occurred.
+!
+  implicit none
+
+  include "mpif.h"
+
+  integer n
+
+  integer*4 data1(n)
+  integer*4 data2(n)
+  integer ierror
+
+  ierror = MPI_SUCCESS
+
+  data2(1:n) = data1(1:n)
+
+  return
+end
+subroutine mpi_copy_integer8 ( data1, data2, n, ierror )
+
+!*****************************************************************************80
+!
+!! MPI_COPY_INTEGER8 copies an integer8 vector.
+!
+!  Discussion:
+!
+!    This routine is not part of the MPI standard.  However, it is
+!    needed by other routines which do emulate standard MPI routines.
+!
+!  Licensing:
+!
+!    This code is distributed under the GNU LGPL license.
+!
+!  Modified:
+!
+!    16 November 2015
+!
+!  Author:
+!
+!    R.W. Ogburn
+!
+!  Parameters:
+!
+!    Input, integer*8 DATA1(N), the data to be copied.
+!
+!    Output, integer*8 DATA2(N), the copied data.
+!
+!    Input, integer N, the number of items of data.
+!
+!    Output, integer IERROR, is nonzero if an error occurred.
+!
+  implicit none
+
+  include "mpif.h"
+
+  integer n
+
+  integer*8 data1(n)
+  integer*8 data2(n)
   integer ierror
 
   ierror = MPI_SUCCESS
@@ -1785,6 +1891,10 @@ subroutine mpi_reduce_scatter ( data1, data2, n, datatype, operation, comm, &
     call mpi_copy_double_precision ( data1, data2, n, ierror )
   else if ( datatype == mpi_integer ) then
     call mpi_copy_integer ( data1, data2, n, ierror )
+  else if ( datatype == mpi_integer4 ) then
+    call mpi_copy_integer4 ( data1, data2, n, ierror )
+  else if ( datatype == mpi_integer8 ) then
+    call mpi_copy_integer8 ( data1, data2, n, ierror )
   else if ( datatype == mpi_real ) then
     call mpi_copy_real ( data1, data2, n, ierror )
   else
