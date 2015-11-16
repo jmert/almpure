@@ -1,7 +1,7 @@
 # The libraries to build
 noinst_LIBRARIES = libmpi_stubs.a
 noinst_HEADERS = \
-        mpi_stubs_c.h
+        mpi.h
 
 # The files to add to the library and to the source distribution
 libmpi_stubs_a_SOURCES = \

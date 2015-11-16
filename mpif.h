@@ -44,14 +44,20 @@
 !
   integer mpi_integer
   parameter ( mpi_integer = 1 )
+  integer mpi_integer4
+  parameter ( mpi_integer4 = 2 )
+  integer mpi_integer8
+  parameter ( mpi_integer8 = 3 )
   integer mpi_real
-  parameter ( mpi_real = 2 )
+  parameter ( mpi_real = 4 )
   integer mpi_double_precision
-  parameter ( mpi_double_precision = 3 )
+  parameter ( mpi_double_precision = 5 )
   integer mpi_logical
-  parameter ( mpi_logical = 4 )
+  parameter ( mpi_logical = 6 )
   integer mpi_character
-  parameter ( mpi_character = 5 )
+  parameter ( mpi_character = 7 )
+  integer mpi_double_complex
+  parameter ( mpi_double_complex = 8)
 !
 !  allreduce operations
 !

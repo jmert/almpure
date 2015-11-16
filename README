@@ -10,3 +10,6 @@ Fortran 90 implementation from:
 http://people.sc.fsu.edu/~jburkardt/f_src/mpi_stubs/mpi_stubs.html
 
 Licensed under GNU LGPL.
+
+Modified by R.W. Ogburn <rwogburrn@gmail.com> for use in
+compiling the s2hat and pure-s2hat packages.
