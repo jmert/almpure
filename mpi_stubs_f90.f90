@@ -35,7 +35,7 @@ subroutine mpi_abort ( comm, errorcode, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer errorcode
@@ -93,7 +93,7 @@ subroutine mpi_allgather ( data1, nsend, sendtype,data2, nrecv, recvtype, &
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer nsend
 
@@ -163,7 +163,7 @@ subroutine mpi_allgatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, &
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer nsend
 
@@ -247,7 +247,7 @@ subroutine mpi_allreduce ( data1, data2, n, datatype, operation, comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -315,7 +315,7 @@ subroutine mpi_barrier ( comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer ierror
@@ -374,7 +374,7 @@ subroutine mpi_bcast ( data, n, datatype, node, comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -442,7 +442,7 @@ subroutine mpi_bsend ( data, n, datatype, iproc, itag, comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -497,7 +497,7 @@ subroutine mpi_cart_create ( comm, ndims, dims, periods, reorder, comm_cart, &
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer ndims
 
@@ -551,7 +551,7 @@ subroutine mpi_cart_get ( comm, ndims, dims, periods, coords, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer ndims
 
@@ -606,7 +606,7 @@ subroutine mpi_cart_shift ( comm, idir, idisp, isource, idest, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer idest
@@ -656,7 +656,7 @@ subroutine mpi_comm_dup ( comm, comm_out, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer comm_out
@@ -701,7 +701,7 @@ subroutine mpi_comm_free ( comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer ierror
@@ -745,7 +745,7 @@ subroutine mpi_comm_rank ( comm, me, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer ierror
@@ -795,7 +795,7 @@ subroutine mpi_comm_size ( comm, nprocs, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer ierror
@@ -841,7 +841,7 @@ subroutine mpi_comm_split ( comm, icolor, ikey, comm_new, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer comm
   integer comm_new
@@ -897,7 +897,7 @@ subroutine mpi_copy_double_precision ( data1, data2, n, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -955,7 +955,7 @@ subroutine mpi_copy_integer ( data1, data2, n, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1013,7 +1013,7 @@ subroutine mpi_copy_real ( data1, data2, n, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1060,7 +1060,7 @@ subroutine mpi_finalize ( ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer ierror
 
@@ -1105,7 +1105,7 @@ subroutine mpi_get_count ( istatus, datatype, icount, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer datatype
   integer icount
@@ -1153,7 +1153,7 @@ subroutine mpi_init ( ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer ierror
 
@@ -1204,7 +1204,7 @@ subroutine mpi_irecv ( data, n, datatype, iproc, itag, comm, irequest, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1281,7 +1281,7 @@ subroutine mpi_isend ( data, n, datatype, iproc, itag, comm, request, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1345,7 +1345,7 @@ subroutine mpi_recv ( data, n, datatype, iproc, itag, comm, istatus, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1429,7 +1429,7 @@ subroutine mpi_reduce ( data1, data2, n, datatype, operation, receiver, &
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1510,7 +1510,7 @@ subroutine mpi_reduce_double_precision ( data1, data2, n, operation, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1594,7 +1594,7 @@ subroutine mpi_reduce_integer ( data1, data2, n, operation, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1678,7 +1678,7 @@ subroutine mpi_reduce_real ( data1, data2, n, operation, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1768,7 +1768,7 @@ subroutine mpi_reduce_scatter ( data1, data2, n, datatype, operation, comm, &
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1836,7 +1836,7 @@ subroutine mpi_rsend ( data, n, datatype, iproc, itag, comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1909,7 +1909,7 @@ subroutine mpi_send ( data, n, datatype, iproc, itag, comm, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer n
 
@@ -1965,7 +1965,7 @@ subroutine mpi_wait ( irequest, istatus, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer ierror
   integer irequest
@@ -2016,7 +2016,7 @@ subroutine mpi_waitall ( icount, irequest, istatus, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer icount
   integer ierror
@@ -2068,7 +2068,7 @@ subroutine mpi_waitany ( icount, array_of_requests, index, istatus, ierror )
 !
   implicit none
 
-  include "mpi_stubs_f90.h"
+  include "mpif.h"
 
   integer array_of_requests(*)
   integer icount

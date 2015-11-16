@@ -17,15 +17,23 @@
 # define MPI_Op int
 
 # define MPI_INT 1
-# define MPI_FLOAT 2
-# define MPI_DOUBLE 3
-# define MPI_DOUBLE_PRECISION 3
-# define MPI_BYTE 4
+# define MPI_LONG_INT 2
+# define MPI_LONG_LONG_INT 3
+# define MPI_FLOAT 4
+# define MPI_DOUBLE 5
+# define MPI_DOUBLE_PRECISION 6
+# define MPI_BYTE 7
+# define MPI_DOUBLE_COMPLEX 8
 
 # define MPI_SUM 1
 # define MPI_MAX 2
 # define MPI_MIN 3
 # define MPI_PRODUCT 4
+
+/* Definitions that are determined by configure. */
+typedef long MPI_Aint;
+typedef int MPI_Fint;
+typedef long long MPI_Count;
 
 void MPI_Abort ( MPI_Comm comm, int ierror );
 int MPI_Allgather ( void *sendbuf, int sendcount, MPI_Datatype sendtype,
