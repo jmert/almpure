@@ -832,6 +832,39 @@ int MPI_Comm_split ( MPI_Comm comm, int icolor, int ikey, MPI_Comm *comm_new )
 }
 /******************************************************************************/
 
+MPI_Fint MPI_Comm_c2f ( MPI_Comm comm )
+
+/******************************************************************************/
+/*
+  Purpose:
+
+    MPI_COMM_C2F Translates a C handle into a Fortran handle.
+
+  Licensing:
+
+    This code is distributed under the GNU LGPL license.
+
+  Modified:
+
+    17 November 2015
+
+  Author:
+
+    R.W. Ogburn
+
+  Parameters:
+
+    Input, MPI_Comm COMM, the MPI communicator.
+
+    Output, MPI_Comm COMM_NEW, the new MPI communicator.
+
+    Output, int IERROR, is nonzero if an error occurred.
+*/
+{
+  return comm;
+}
+/******************************************************************************/
+
 int mpi_copy_byte ( char *data1, char *data2, int n )
 
 /******************************************************************************/
