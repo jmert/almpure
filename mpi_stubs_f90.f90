@@ -331,6 +331,73 @@ subroutine mpi_allgatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, &
 
   return
 end
+subroutine mpi_scatterv ( data1, nsend, displsend, sendtype, data2, nrecv, &
+  recvtype, root, comm, ierror )
+
+!*****************************************************************************80
+!
+!! MPI_SCATTERV scatters data to all the processes in a communicator.
+!
+!  Discussion:
+!
+!    Copy values from DATA1 to DATA2.
+!
+!    The data to be transferred can be integer, real, or double precision.
+!    In this routine, it is declared and documented as INTEGER type,
+!    but using the other types should generally not cause a problem.
+!
+!  Licensing:
+!
+!    This code is distributed under the GNU LGPL license.
+!
+!  Modified:
+!
+!    17 November 2015
+!
+!  Author:
+!
+!    R.W. Ogburndt
+!
+!  Parameters:
+!
+!    Input, integer COMM, the MPI communicator.
+!
+!    Output, integer IERROR, is nonzero if an error occurred.
+!
+  implicit none
+
+  include "mpif.h"
+
+  integer nsend
+
+  integer comm
+  integer data1(nsend)
+  integer data2(nsend)
+  integer ierror
+  integer displsend
+  integer nrecv
+  integer recvtype
+  integer sendtype
+  integer root
+
+  ierror = MPI_SUCCESS
+
+  if ( sendtype == mpi_double_precision ) then
+    call mpi_copy_double_precision ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer ) then
+    call mpi_copy_integer ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer4 ) then
+    call mpi_copy_integer4 ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_integer8 ) then
+    call mpi_copy_integer8 ( data1, data2, nsend, ierror )
+  else if ( sendtype == mpi_real ) then
+    call mpi_copy_real ( data1, data2, nsend, ierror )
+  else
+    ierror = MPI_FAILURE
+  end if
+
+  return
+end
 subroutine mpi_alltoallv ( data1, nsend, displsend, sendtype, data2, nrecv, displrecv, &
   recvtype, comm, ierror )
 
