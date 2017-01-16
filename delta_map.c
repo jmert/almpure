@@ -177,7 +177,7 @@ void gen_delta_alms(s2hat_dcomplex* alms, int nstokes, int nlmax, int nmmax,
             s2hat_dcomplex v;
             v.re = randn() / sqrt(2);
             v.im = randn() / sqrt(2);
-            alms[ii + delta_ell*(nstokes) + mm*(nstokes+nlmax)] = v;
+            alms[ii + delta_ell*(nstokes) + mm*(nstokes*nlmax)] = v;
         }
     }
 }
