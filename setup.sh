@@ -2,9 +2,11 @@
 
 # Required modules to compile on Harvard's Odyssey cluster
 if [ $(hostname -f | grep -o "rc.fas.harvard.edu") ]; then
-    module load fftw/3.3.4-fasrc09
-    module load gcc/5.3.0-fasrc01
-    module load openmpi/1.10.4-fasrc01
+    if ! which mpicc 2>&1 >/dev/null; then
+        module load gcc/5.3.0-fasrc01
+        module load openmpi/1.10.4-fasrc01
+        module load fftw/3.3.4-fasrc09
+    fi
 fi
 
 if [ ! -d s2hat ]; then
