@@ -99,8 +99,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
     tmp_ndim = mxGetNumberOfDimensions(ml_alms);
     tmp_dims = mxGetDimensions(ml_alms);
     nstokes = tmp_dims[0];
-    nlmax = tmp_dims[1];
-    nmmax = tmp_dims[2];
+    nlmax = tmp_dims[1] - 1;
+    nmmax = tmp_dims[2] - 1;
     if (tmp_ndim > 3) {
         nmaps = tmp_dims[3];
     } else {

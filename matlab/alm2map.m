@@ -30,11 +30,11 @@ function map=alm2map(alms,nside)
 % EXAMPLE
 %
 %   nstokes = 3; nlmax = 80; nmmax = nlmax; nmaps = 1;
-%   nside = 1;
-%   alms = zeros(nstokes, nlmax, nmmax, nmaps);
+%   nside = 128;
+%   alms = zeros(nstokes, nlmax+1, nmmax+1, nmaps);
 %   % Make a random delta-80 map
-%   alms(:,nmmax,:,:) = complex(...
-%       randn(nstokes,nmmax,nmaps), randn(nstokes,nmmax,nmaps));
+%   alms(:,nmmax+1,:,:) = complex(...
+%       randn(nstokes,nmmax+1,nmaps), randn(nstokes,nmmax+1,nmaps));
 %
 %   hmap.nside = nside;
 %   hmap.ordering = 'ring';
