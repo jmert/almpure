@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include "debug.h"
 
 #include <mex.h>
 #include <matrix.h>
@@ -19,6 +20,7 @@ int alm2map(double* map, int nside, s2hat_dcomplex* alms, int nstokes,
 
 static int alm2map_init = 0;
 void alm2map_atexit() {
+    dbglog("Finalizing MPI...\n");
     MPI_Finalize();
 }
 
@@ -54,12 +56,14 @@ void mexFunction(int nlhs, mxArray* plhs[],
 
     /* Initialize MPI if necessary */
     if (alm2map_init == 0) {
+        dbglog("Initializing MPI...\n");
         alm2map_init = 1;
         MPI_Init(0, NULL);
         mexAtExit(&alm2map_atexit);
     }
 
     /* Validate MATLAB inputs */
+    dbglog("Validating MATLAB inputs...\n");
     if (nrhs != 2) {
         mexErrMsgIdAndTxt("alm2map:args:nrhs",
                 "Two input arguments are required");
@@ -105,6 +109,14 @@ void mexFunction(int nlhs, mxArray* plhs[],
     /* Get the nside for the output map */
     nside = *((int32_t*)mxGetData(ml_nside));
 
+    dbglog("Using parameters given shape of input alms:\n"
+           "    nstokes = %d\n"
+           "    nlmax   = %d\n"
+           "    nmmax   = %d\n"
+           "    nmaps   = %d\n",
+           nstokes, nlmax, nmmax, nmaps);
+
+    dbglog("Converting from Matlab to s2hat complex format...\n");
     /* Convert from Matlab complex numbers to s2hat format */
     ml_alms_r = mxGetPr(ml_alms);
     ml_alms_i = mxGetPi(ml_alms);
@@ -129,6 +141,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
      * has allocated */
     map = (double*)mxGetData(ml_map);
 
+    dbglog("Running alm2map...\n");
     /* Now execute the s2hat algorithm */
     int ret = alm2map(map, nside, alms, nstokes, nlmax, nmmax, nmaps);
 
