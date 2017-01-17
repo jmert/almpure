@@ -18,7 +18,6 @@
 int alm2map(double* map, int nside, s2hat_dcomplex* alms, int nstokes,
             int nlmax, int nmmax, int nmaps);
 
-static int alm2map_init = 0;
 void alm2map_atexit() {
     dbglog("Finalizing MPI...\n");
     MPI_Finalize();
@@ -54,12 +53,14 @@ void mexFunction(int nlhs, mxArray* plhs[],
     s2hat_dcomplex* alms = NULL;
     double* map = NULL;
 
+    /* Other */
+    int mpi_init;
+
     /* Initialize MPI if necessary */
-    if (alm2map_init == 0) {
+    MPI_Initialized(&mpi_init);
+    if (mpi_init == 0) {
         dbglog("Initializing MPI...\n");
-        alm2map_init = 1;
         MPI_Init(0, NULL);
-        mexAtExit(&alm2map_atexit);
     }
 
     /* Validate MATLAB inputs */
