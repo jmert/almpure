@@ -1,5 +1,5 @@
-function alms=map2alm(map,nlmax,nmmax)
-% alms=map2alm(map,nlmax,nmmax)
+function alms=map2alm(map,lmax,mmax)
+% alms=map2alm(map,lmax,mmax)
 %
 % Decomposes the given map into alms using the S2HAT library.
 %
@@ -18,21 +18,21 @@ function alms=map2alm(map,nlmax,nmmax)
 %              nmaps    Number of distinct maps
 %                       Note! nmaps ~= 1 is not yet supported.
 %
-%   nlmax    Maximum l-mode to decompose.
+%   lmax     Maximum l-mode to decompose.
 %
-%   nmmax    Maximum m-mode to decompose, where nmmax <= nlmax. If not
+%   mmax     Maximum m-mode to decompose, where 0 <= nmmax <= nlmax. If not
 %            given or empty, then nmmax = nlmax.
 %
 % OUTPUTS
 %
 %   alms     alms for the decomposed maps. Dimensions will be
-%            (nstokes,nlmax+1,nmmax+1,nmaps).
+%            (nstokes,lmax+1,mmax+1,nmaps).
 %
 % EXAMPLE
 %
 
-  if ~exist('nmmax','var') || isempty(nmmax)
-    nmmax = nlmax
+  if ~exist('mmax','var') || isempty(mmax)
+    mmax = lmax
   end
 
   if size(map,2) ~= 1 && size(map,2) ~= 3
@@ -43,6 +43,6 @@ function alms=map2alm(map,nlmax,nmmax)
     error('nmaps > 1 is not yet supported')
   end
 
-  alms = map2alm_c(map, int32(nlmax), int32(nmmax));
+  alms = map2alm_c(map, int32(lmax), int32(mmax));
 end
 
