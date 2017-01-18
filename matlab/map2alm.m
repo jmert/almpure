@@ -35,6 +35,10 @@ function alms=map2alm(map,lmax,mmax)
     mmax = lmax
   end
 
+  if ~any(ndims(map) == [2 3])
+    error('map must have 2 or 3 dimensions')
+  end
+
   if size(map,2) ~= 1 && size(map,2) ~= 3
     error('expected map for 1 or 3 Stokes parameters')
   end
