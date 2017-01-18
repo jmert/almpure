@@ -13,7 +13,8 @@ all: delta_map matlab
 .PHONY: s2hat matlab clean cleanall
 
 s2hat:
-	./setup.sh
+	@./setup.sh
+	make -C s2hat
 
 delta_map: delta_map.c | s2hat
 	mpicc $(CFLAGS) -o $@ $^ $(LDFLAGS)
