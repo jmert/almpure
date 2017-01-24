@@ -52,15 +52,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
     double* map = NULL;
     double* apmask = NULL;
 
-    /* Other */
-    int mpi_init;
-
     /* Initialize MPI if necessary */
-    MPI_Initialized(&mpi_init);
-    if (mpi_init == 0) {
-        dbglog("Initializing MPI...\n");
-        MPI_Init(0, NULL);
-    }
+    mexCallMATLAB(0, NULL, 0, NULL, "mpihelper");
 
     /* Validate MATLAB inputs */
     dbglog("Validating MATLAB inputs...\n");

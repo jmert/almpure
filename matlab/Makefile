@@ -7,6 +7,7 @@ ifeq ($(TARGET),release)
 else
 	MFLAGS = -g
 endif
+MFLAGS += -largeArrayDims
 
 S2HATPATH := $(shell readlink -m $(ORIGIN)/../s2hat)
 CFLAGS += -I$(S2HATPATH)
@@ -18,7 +19,7 @@ LDFLAGS += $(shell mpifort --showme:link)
 
 .PHONY: clean
 
-all: alm2map_c.mexa64 map2alm_c.mexa64 map2almpure_c.mexa64
+all: mpihelper.mexa64 alm2map_c.mexa64 map2alm_c.mexa64 map2almpure_c.mexa64
 
 %.mexa64: %.c
 	mex $(MFLAGS) -output $@ CFLAGS='$$CFLAGS $(CFLAGS)' LDFLAGS='$$LDFLAGS $(LDFLAGS)' $^
