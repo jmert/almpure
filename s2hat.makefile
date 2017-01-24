@@ -30,6 +30,7 @@ ifneq (,$(filter $(FFTPKG),FFTW3_HC2R FFTW3_C2R))
 	FFLAGS += $(shell pkg-config --cflags fftw3)
 	CFLAGS += $(shell pkg-config --cflags fftw3)
 	LDFLAGS += $(shell pkg-config --libs fftw3)
+	FFTW_STATIC = $(shell $(CC) $(LDFLAGS) --print-file-name=libfftw3.a)
 endif
 
 # Ordered list of objects to compile. The order is important since the Fortran
@@ -48,8 +49,14 @@ all: libs2hat.a libs2hat.so
 libs2hat.a: $(OBJECTS)
 	$(AR) rcs $@ $^
 
+# Target required for Matlab's mex functions which includes the FFTW functions
+# statically so that the Matlab-internal functions aren't used instead.
+libs2hat_fftw.a: libs2hat.a
+	echo -e "CREATE $@\nADDLIB $^\nADDLIB $(FFTW_STATIC)\nSAVE\nEND" | ar -M
+	ranlib $@
+
 libs2hat.so: $(OBJECTS)
-	$(CC) -shared $(CFLAGS) $(LDFLAGS) -o $@ $^
+	$(CC) -o $@ -shared $(CFLAGS) $^ $(LDFLAGS)
 
 clean:
 	rm -f *.so *.a *.o *.mod

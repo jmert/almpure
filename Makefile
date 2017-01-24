@@ -20,6 +20,7 @@ delta_map: delta_map.c | s2hat
 	mpicc $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 matlab: | s2hat
+	make -C s2hat libs2hat_fftw.a
 	make -C matlab
 
 julia: | s2hat
