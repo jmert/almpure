@@ -1,7 +1,7 @@
-function alms=gen_delta_alms(ell,lmax,mmax,seed)
-% alms=gen_delta_alms(ell,lmax,mmax,seed)
+function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
+% alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
 %
-% Draws random alms for C_ell = 1.
+% Draws random alms for C_l = 1 (or l(l+1)C_l = 1).
 %
 % INPUTS
 %
@@ -13,6 +13,10 @@ function alms=gen_delta_alms(ell,lmax,mmax,seed)
 %
 %   mmax    Maximum m mode, where mmax <= lmax. If ell > mmax, then only
 %           the first mmax alm values are filled.
+%
+%   delta   Optional. Selects whether delta response is in terms of C_l
+%           (the 'cl' option) or D_l (the 'dl' option; i.e. l(l+1)*Cl).
+%           Defaults to 'cl'.
 %
 %   seed    Optional. Defaults to 1336+(1:length(ell)), or if a scalar,
 %           replicated to length(ell).
@@ -30,6 +34,10 @@ function alms=gen_delta_alms(ell,lmax,mmax,seed)
 %   alms = gen_delta_alms([0,80,0], 700, 700, [1,2,3]);
 %
 
+  if ~exist('delta','var') || isempty(delta)
+    delta = 'cl';
+  end
+
   if ~exist('seed','var') || isempty(seed)
     seed = 1336 + (1:length(ell));
   end
@@ -42,19 +50,25 @@ function alms=gen_delta_alms(ell,lmax,mmax,seed)
     if ell(ii) == 0
       continue
     end
-    alms(ii,:,:) = gen_one(ell(ii), lmax, mmax, seed(ii));
+    alms(ii,:,:) = gen_one(ell(ii), lmax, mmax, delta, seed(ii));
   end
 
   alms = squeeze(alms);
 end
 
-function alms=gen_one(ell,lmax,mmax,seed)
-  rt2 = 1/sqrt(2);
-  rng(seed)
+function alms=gen_one(ell,lmax,mmax,delta,seed)
+  if strcmp(delta,'dl')
+    scale = sqrt(1/(ell*(ell+1)));
+  else
+    scale = 1;
+  end
+
+  rt2 = scale/sqrt(2);
+  rng(seed);
 
   alms = zeros(lmax+1,mmax+1);
   % m == 0 must be real
-  alms(ell+1,1) = randn();
+  alms(ell+1,1) = scale*randn();
   % Other m's are complex
   ii = min(ell+1,mmax+1);
   alms(ell+1,2:ii) = complex(rt2*randn(1,ii-1), rt2*randn(1,ii-1));
