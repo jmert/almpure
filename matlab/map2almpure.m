@@ -54,6 +54,8 @@ function alms=map2almpure(map,apmask,lmax,mmax)
     error('map and apmask must have same number of pixels')
   end
 
+  % Do not apodize the map. map2almpure_c internally does this
+  % itself.
   alms = map2almpure_c(map, apmask, int32(lmax), int32(mmax));
 end
 

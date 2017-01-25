@@ -1,5 +1,5 @@
-function alms=map2alm(map,lmax,mmax)
-% alms=map2alm(map,lmax,mmax)
+function alms=map2alm(map,apmask,lmax,mmax)
+% alms=map2alm(map,apmask,lmax,mmax)
 %
 % Decomposes the given map into alms using the S2HAT library.
 %
@@ -17,6 +17,10 @@ function alms=map2alm(map,lmax,mmax)
 %
 %              nmaps    Number of distinct maps
 %                       Note! nmaps ~= 1 is not yet supported.
+%
+%   apmask   Apodization masks of size (npix, nmaps) corresponding to the
+%            mask to be applied to map. If empty, no extra apodization is
+%            applied.
 %
 %   lmax     Maximum l-mode to decompose.
 %
@@ -47,6 +51,12 @@ function alms=map2alm(map,lmax,mmax)
     error('nmaps > 1 is not yet supported')
   end
 
+  if ~isempty(apmask)
+    % Apply the apodization mask before sending to map2alm_c, if one was
+    % provided. This is mainly for symmetry with map2almpure which requires
+    % an apodization mask be provided.
+    map = bsxfun(@times, map, apmask);
+  end
   alms = map2alm_c(map, int32(lmax), int32(mmax));
 end
 
