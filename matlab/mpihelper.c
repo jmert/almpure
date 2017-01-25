@@ -1,3 +1,4 @@
+#line 1 "mpihelper.c" /* workaround for mex compiler using full path */
 #include <mpi.h>
 #include <mex.h>
 #include "debug.h"

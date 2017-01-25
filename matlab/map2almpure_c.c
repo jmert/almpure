@@ -1,3 +1,4 @@
+#line 1 "map2almpure_c.c" /* workaround for mex compiler using full path */
 /* These are needed before s2hat.h can be included since it doesn't take care
  * of loading it's own requirements, apparently... */
 #include <sys/types.h>
