@@ -203,6 +203,7 @@ int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
     s2hat_scandef scan = { 0 };
     s2hat_pixparameters param;
     double bounds[2];
+    int* mask = NULL;
     double* local_map = NULL;
     double* local_apmask = NULL;
     int32_t* local_mask = NULL;
@@ -219,14 +220,36 @@ int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
-    /* Setup to describe the type of map we want to analyze. We'll assume
-     * full-sky at the selected nside. */
+    /* Setup to describe the type of map we want to analyze. */
     param.par1 = nside;
     param.par2 = 0;
     set_pixelization(PIXCHOICE_HEALPIX, param, &pixel);
-    bounds[0] = -1.0; /* full sky */
-    bounds[1] =  1.0;
-    zbounds2scan(bounds, pixel, &scan);
+    /* Automatically determine the observation region by building a mask from
+     * the non-zero/inf/nan entries in the apodization mask */
+    if (myrank == 0) {
+        mask = (int*)calloc(pixel.npixsall, sizeof(int));
+        if (mask == NULL) {
+            perror("alloc mask");
+            ret = -1;
+            goto cleanup;
+        }
+        for (size_t ii=0; ii<pixel.npixsall; ++ii) {
+            double ap = apmask[ii];
+            if (ap == 0.0 || isnan(ap) || isinf(ap)) {
+                mask[ii] = 0;
+            } else {
+                mask[ii] = 1;
+            }
+        }
+        mask2scan(mask, pixel, &scan);
+        /* Free the mask now that we know the boundaries */
+        free(mask); mask = NULL;
+        dbglog("Operating on %d of %d rings (%0.2lf%%)\n",
+                scan.nringsobs, pixel.nringsall,
+                100.0*scan.nringsobs/pixel.nringsall);
+    }
+    /* All processes need the information, so synchronize */
+    MPI_scanBcast(pixel, &scan, 0, myrank, MPI_COMM_WORLD);
 
     /* To work in a distrubted fashion, we need to know the sizes of the
      * various data sets' local size. */
@@ -326,6 +349,7 @@ cleanup:
     if (local_mask != NULL) free(local_mask);
     if (local_apmask != NULL) free(local_apmask);
     if (local_map != NULL) free(local_map);
+    if (mask != NULL) free(mask);
     if (mvals != NULL) free(mvals);
     if (local_alms != NULL) free(local_alms);
     destroy_scan(scan);
