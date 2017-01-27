@@ -16,9 +16,6 @@ s2hat:
 	@./setup.sh
 	make -C s2hat
 
-delta_map: delta_map.c | s2hat
-	mpicc $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
 matlab: | s2hat
 	make -C s2hat libs2hat_fftw.a
 	make -C matlab
@@ -27,7 +24,6 @@ julia: | s2hat
 	make -C julia
 
 clean:
-	rm -f delta_map
 	make -C matlab clean
 	make -C julia clean
 
