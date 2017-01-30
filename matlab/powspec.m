@@ -1,4 +1,4 @@
-function [cl,dl]=powspec(map,apmask,lmax,mmax)
+function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
 % [cl,dl]=alm2cl(map,apmask,lmax,mmax)
 %
 % Computes the 6 (or 9) auto- and cross-spectra of the given T, Q, and U maps
@@ -23,6 +23,9 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax)
 %   mmax     Maximum m-mode to decompose, where 0 <= nmmax <= nlmax. If not
 %            given or empty, then nmmax = nlmax.
 %
+%   pure     Optional, defaults to true. If true, Q/U -> E/B is performed by
+%            calling map2almpure(), otherwise by map2alm().
+%
 % OUTPUTS
 %
 %   cl
@@ -34,6 +37,9 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax)
 
   if ~exist('mmax','var') || isempty(mmax)
     mmax = lmax;
+  end
+  if ~exist('pure','var') || isempty(pure)
+    pure = true;
   end
 
   if ~any(ndims(map) == [2 3])
@@ -71,8 +77,18 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax)
   for ii=1:nautos
     masksel = min(size(apmask,3), ii);
 
-    almsT{ii} = map2alm(    map(:,1,  ii), apmask(:,1,masksel), lmax, mmax);
-    almsP{ii} = map2almpure(map(:,2:3,ii), apmask(:,2,masksel), lmax, mmax);
+    if pure
+      almsT{ii} = map2alm(    map(:,1,ii),   apmask(:,1,masksel), lmax, mmax);
+      almsP{ii} = map2almpure(map(:,2:3,ii), apmask(:,2,masksel), lmax, mmax);
+    else
+      tmpmask = cat(2, apmask(:,1,masksel), ...
+                       apmask(:,2,masksel), apmask(:,2,masksel));
+      tmpalm  = map2alm(map(:,:,ii), tmpmask, lmax, mmax);
+      clear tmpmask
+      almsT{ii} = tmpalm(1,  :,:);
+      almsP{ii} = tmpalm(2:3,:,:);
+      clear tmpalm
+    end
 
     aT = squeeze(almsT{ii});
     aE = squeeze(almsP{ii}(1,:,:));
