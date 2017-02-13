@@ -73,6 +73,9 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
   map(isnan(map)) = 0.0;
   apmask(isnan(apmask)) = 0.0;
 
+  scale = npix ./ sum(apmask,1);
+  apmask = bsxfun(@times, apmask, scale);
+
   % Compute the map auto spectra
   for ii=1:nautos
     masksel = min(size(apmask,3), ii);
