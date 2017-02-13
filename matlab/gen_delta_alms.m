@@ -41,8 +41,17 @@ function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
   if ~exist('seed','var') || isempty(seed)
     seed = 1336 + (1:length(ell));
   end
-  if length(seed) == 1
-    seed = repmat(seed, length(ell), 1);
+  if isnumeric(seed)
+    if length(seed) == 1
+      seed = repmat(seed, length(ell), 1);
+    end
+    rngstr = RandStream.create('mlfg6331_64', 'Seed',seed, ...
+        'NumStreams',length(seed), 'NormalTransform','Ziggurat', ...
+        'CellOutput', true);
+  else
+    if ~iscell(seed)
+      rngstr = repmat({seed}, length(ell), 1);
+    end
   end
 
   alms = zeros(length(ell), lmax+1, mmax+1);
@@ -50,26 +59,24 @@ function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
     if ell(ii) == 0
       continue
     end
-    alms(ii,:,:) = gen_one(ell(ii), lmax, mmax, delta, seed(ii));
+    alms(ii,:,:) = gen_one(ell(ii), lmax, mmax, delta, rngstr{ii});
   end
 
   alms = squeeze(alms);
 end
 
-function alms=gen_one(ell,lmax,mmax,delta,seed)
+function alms=gen_one(ell,lmax,mmax,delta,rngstr)
   if strcmp(delta,'dl')
-    scale = sqrt(1/(ell*(ell+1)));
+    scale = sqrt(2*pi/(ell*(ell+1)));
   else
     scale = 1;
   end
-
   rt2 = scale/sqrt(2);
-  rng(seed);
 
   alms = zeros(lmax+1,mmax+1);
   % m == 0 must be real
-  alms(ell+1,1) = scale*randn();
+  alms(ell+1,1) = scale*rngstr.randn();
   % Other m's are complex
   ii = min(ell+1,mmax+1);
-  alms(ell+1,2:ii) = complex(rt2*randn(1,ii-1), rt2*randn(1,ii-1));
+  alms(ell+1,2:ii) = complex(rt2*rngstr.randn(1,ii-1), rt2*rngstr.randn(1,ii-1));
 end
