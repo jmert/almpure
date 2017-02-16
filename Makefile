@@ -8,7 +8,7 @@ LDFLAGS += -lm -L./s2hat -ls2hat -Wl,-rpath=$(ORIGIN)/s2hat
 CFLAGS += $(shell mpifort --showme:compile)
 LDFLAGS += $(shell mpifort --showme:link)
 
-all: s2hat delta_map
+all: s2hat
 
 .PHONY: s2hat matlab clean cleanall
 
