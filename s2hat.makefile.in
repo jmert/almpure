@@ -9,8 +9,9 @@ FFTPKG := FFTW3_C2R
 MPILIB := OPEN_MPI
 
 AR = ar
-FC = mpif90
-CC = mpicc
+RANLIB = @RANLIB@
+MPIFC = @MPIFC@
+MPICC = @MPICC@
 
 # Set compiler defines for the choices set above.
 DFLAGS = -g -D$(PLATFORM) -D$(FFTPKG)
@@ -53,20 +54,20 @@ libs2hat.a: $(OBJECTS)
 # statically so that the Matlab-internal functions aren't used instead.
 libs2hat_fftw.a: libs2hat.a
 	echo -e "CREATE $@\nADDLIB $^\nADDLIB $(FFTW_STATIC)\nSAVE\nEND" | ar -M
-	ranlib $@
+	$(RANLIB) $@
 
 libs2hat.so: $(OBJECTS)
-	$(CC) -o $@ -shared $(CFLAGS) $^ $(LDFLAGS)
+	$(MPICC) -o $@ -shared $(CFLAGS) $^ $(LDFLAGS)
 
 clean:
 	rm -f *.so *.a *.o *.mod
 
 %.o: %.f90
-	$(FC) $(FFLAGS) -o $@ -c $<
+	$(MPIFC) $(FFLAGS) -o $@ -c $<
 
 %.o: %.F90
-	$(FC) $(FFLAGS) -o $@ -c $<
+	$(MPIFC) $(FFLAGS) -o $@ -c $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(MPICC) $(CFLAGS) -o $@ -c $<
 

@@ -1,5 +1,15 @@
 s2hat/
 *.tar.gz
 
-delta_map
+# Editors
+#
+# vim
+*.swp
+*.swo
 
+# Ignore autotools outputs
+/autom4te.cache/
+/config.status
+/config.log
+/configure
+/s2hat.makefile
