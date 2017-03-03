@@ -18,8 +18,9 @@ function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
 %           (the 'cl' option) or D_l (the 'dl' option; i.e. l(l+1)*Cl).
 %           Defaults to 'cl'.
 %
-%   seed    Optional. Defaults to 1336+(1:length(ell)), or if a scalar,
-%           replicated to length(ell).
+%   seed    Optional. Defaults to 1336+(1:size(cl,2)). May also be a cell array
+%           of random number generators for each spectrum, initialized to have
+%           lmax+1-many substreams.
 %
 % OUTPUTS
 %
@@ -31,8 +32,14 @@ function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
 % EXAMPLE
 %
 %   % Generate alms for a E-mode only, ell=80 spectrum
-%   alms = gen_delta_alms([0,80,0], 700, 700, [1,2,3]);
+%   alms = gen_delta_alms([0,80,0], 700, 700, 'dl', [1,2,3]);
 %
+
+  nspec = length(ell);
+
+  if ~exist('mmax','var') || isempty(mmax)
+    mmax = lmax;
+  end
 
   if ~exist('delta','var') || isempty(delta)
     delta = 'cl';
@@ -41,22 +48,23 @@ function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
   if ~exist('seed','var') || isempty(seed)
     seed = 1336 + (1:length(ell));
   end
+  if length(seed) ~= nspec
+    error('%d seeds or RNGs are required when given %d spectra', nspec, nspec)
+  end
   if isnumeric(seed)
-    if length(seed) == 1
-      seed = repmat(seed, length(ell), 1);
-    end
-    for ii=1:length(seed)
-      rngstr{ii} = RandStream.create('mlfg6331_64', 'Seed',seed(ii), ...
-          'NumStreams',length(seed), 'NormalTransform','Ziggurat');
-    end
-  else
-    if ~iscell(seed)
-      rngstr = repmat({seed}, length(ell), 1);
+    for ii=1:nspec
+      try
+        rngstr{ii} = RandStream.create('mlfg6331_64', 'Seed',seed(ii), ...
+            'NumStreams',lmax+1, 'NormalTransform','Ziggurat');
+      catch
+        rngstr{ii} = RandStream.create('mlfg6331_64', 'Seed',seed(ii), ...
+            'NumStreams',lmax+1, 'RandnAlg','Ziggurat');
+      end
     end
   end
 
-  alms = zeros(length(ell), lmax+1, mmax+1);
-  for ii=1:length(ell)
+  alms = zeros(nspec, lmax+1, mmax+1);
+  for ii=1:nspec
     if ell(ii) == 0
       continue
     end
@@ -73,6 +81,12 @@ function alms=gen_one(ell,lmax,mmax,delta,rngstr)
     scale = 1;
   end
   rt2 = scale/sqrt(2);
+
+  % Initialize substream in a predictable way (so that both mmax==lmax and
+  % mmax<lmax cases give the same initial random deviates). Using ell also
+  % means that given two equivalent seeds, gen_alms() should be the same as
+  % summing over many calls to gen_delta_alms() (for 'cl' delta type).
+  rngstr.Substream = ell+1;
 
   alms = zeros(lmax+1,mmax+1);
   % m == 0 must be real
