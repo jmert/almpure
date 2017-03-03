@@ -73,7 +73,10 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
   map(isnan(map)) = 0.0;
   apmask(isnan(apmask)) = 0.0;
 
-  scale = sqrt(npix ./ sum(apmask,1));
+  % Scale the apodization mask to preserve power (in an ensemble sense,
+  % assuming that the ensemble are Gaussian random realizations with the
+  % same underlying power spectrum as the full-sky).
+  scale = sqrt(npix ./ sum(apmask.^2,1));
   apmask = bsxfun(@times, apmask, scale);
 
   % Compute the map auto spectra
