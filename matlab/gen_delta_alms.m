@@ -45,9 +45,10 @@ function alms=gen_delta_alms(ell,lmax,mmax,delta,seed)
     if length(seed) == 1
       seed = repmat(seed, length(ell), 1);
     end
-    rngstr = RandStream.create('mlfg6331_64', 'Seed',seed, ...
-        'NumStreams',length(seed), 'NormalTransform','Ziggurat', ...
-        'CellOutput', true);
+    for ii=1:length(seed)
+      rngstr{ii} = RandStream.create('mlfg6331_64', 'Seed',seed(ii), ...
+          'NumStreams',length(seed), 'NormalTransform','Ziggurat');
+    end
   else
     if ~iscell(seed)
       rngstr = repmat({seed}, length(ell), 1);
