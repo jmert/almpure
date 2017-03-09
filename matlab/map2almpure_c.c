@@ -18,7 +18,8 @@
 #include <matrix.h>
 
 int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
-                int nmaps, double* map, double* apmask, int nside);
+                int nmaps, double* map, double* apmask, int nside,
+                double* qwghts);
 
 /*
  * alms = map2almpure(map, apmask, lmax, mmax);
@@ -31,6 +32,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
     const mxArray* ml_apmask = NULL;
     const mxArray* ml_lmax = NULL;
     const mxArray* ml_mmax = NULL;
+    const mxArray* ml_qwghts = NULL;
 
     /* Outputs back to Matlab */
     mxArray* ml_alms = NULL;
@@ -52,15 +54,16 @@ void mexFunction(int nlhs, mxArray* plhs[],
     s2hat_dcomplex* alms = NULL;
     double* map = NULL;
     double* apmask = NULL;
+    double* qwghts = NULL;
 
     /* Initialize MPI if necessary */
     mexCallMATLAB(0, NULL, 0, NULL, "mpihelper");
 
     /* Validate MATLAB inputs */
     dbglog("Validating MATLAB inputs...\n");
-    if (nrhs != 4) {
+    if (nrhs != 5) {
         mexErrMsgIdAndTxt("map2almpure:args:nrhs",
-                "Four input arguments are required");
+                "Five input arguments are required");
     }
 
     if (nlhs != 1) {
@@ -85,9 +88,9 @@ void mexFunction(int nlhs, mxArray* plhs[],
                 "Input apmask must be real and of type double");
     }
     tmp_ndim = mxGetNumberOfDimensions(ml_apmask);
-    if (tmp_ndim != 1 && tmp_ndim != 2) {
+    if (tmp_ndim != 2) {
         mexErrMsgIdAndTxt("map2almpure:args:dims",
-                "Input apmask must have 1 or 2 dimensions");
+                "Input apmask must have 2 dimensions");
     }
 
     ml_lmax = prhs[2];
@@ -100,6 +103,17 @@ void mexFunction(int nlhs, mxArray* plhs[],
     if (!mxIsInt32(ml_mmax) || mxGetNumberOfElements(ml_mmax)!=1) {
         mexErrMsgIdAndTxt("map2almpure:args:notInt32",
                 "Input mmax must be a scalar of type int32");
+    }
+
+    ml_qwghts = prhs[4];
+    if (!mxIsDouble(ml_qwghts) || mxIsComplex(ml_qwghts)) {
+        mexErrMsgIdAndTxt("map2almpure:args:notDouble",
+                "Input qwghts must be real and of type double");
+    }
+    tmp_ndim = mxGetNumberOfDimensions(ml_qwghts);
+    if (tmp_ndim != 2) {
+        mexErrMsgIdAndTxt("map2almpure:args:dims",
+                "Input qwghts must have 2 dimensions");
     }
 
     /* Retrieve information from the given inputs */
@@ -139,9 +153,18 @@ void mexFunction(int nlhs, mxArray* plhs[],
         mexErrMsgIdAndTxt("map2almpure:args:sizeMismatch",
                 "Inputs map and apmask must have same number of pixels");
     }
-    if (tmp_ndim > 1 && tmp_dims[1] != nmaps) {
+    if (tmp_dims[1] != nmaps) {
         mexErrMsgIdAndTxt("map2almpure:args:sizeMismatch",
                 "Inputs map and apmask must have same number of maps");
+    }
+
+    /* Make sure the quadrature weights vector has correct dimensions */
+    tmp_ndim = mxGetNumberOfDimensions(ml_qwghts);
+    tmp_dims = mxGetDimensions(ml_qwghts);
+    if (tmp_dims[0] != 2*nside || tmp_dims[1] != 1) {
+        mexErrMsgIdAndTxt("map2almpure:args:sizeMismatch",
+                "Input qwghts must be an array of size (%d, 1). Got"
+                "size (%d, %d).", 2*nside, tmp_dims[0], tmp_dims[1]);
     }
 
     /* Get the nlmax and nmmax for the output alms */
@@ -160,6 +183,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
      * has allocated */
     map    = (double*)mxGetData(ml_map);
     apmask = (double*)mxGetData(ml_apmask);
+    qwghts = (double*)mxGetData(ml_qwghts);
 
     /* Allocate the s2hat compatible complex array */
     tmp_ndim = nstokes * (lmax+1) * (mmax+1);
@@ -171,7 +195,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 
     dbglog("Running map2almpure...\n");
     int ret = map2almpure(alms, nstokes, lmax, mmax, nmaps, map, apmask,
-            nside);
+            nside, qwghts);
 
     /* Convert from s2hat complex numbers to Matlab format */
     ml_alms_r = mxGetPr(ml_alms);
@@ -189,7 +213,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
 }
 
 int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
-                int nmaps, double* map, double* apmask, int nside)
+                int nmaps, double* map, double* apmask, int nside,
+                double* qwghts)
 {
     int ret = 0;
     /* Process communications */
@@ -251,7 +276,7 @@ int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
     /* All processes need the information, so synchronize */
     MPI_scanBcast(pixel, &scan, 0, myrank, MPI_COMM_WORLD);
 
-    /* To work in a distrubted fashion, we need to know the sizes of the
+    /* To work in a distributed fashion, we need to know the sizes of the
      * various data sets' local size. */
     get_local_data_sizes(0, pixel, scan, lmax, mmax, myrank, nprocs,
             &nmvals, &first_ring, &last_ring, &map_size, &nplm,
@@ -266,7 +291,7 @@ int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
     find_mvalues(myrank, nprocs, mmax, nmvals, mvals);
 
     /* Make enough space for us hold the local portion of the map,
-     * apodization mask, binary mask */
+     * apodization mask, binary mask, and ring weights */
     local_map = (double*)calloc(map_size*nstokes*nmaps, sizeof(double));
     if (local_map == NULL) {
         perror("alloc local_map");
@@ -285,15 +310,6 @@ int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
         ret = -1;
         goto cleanup;
     }
-
-    /* Spread the map and apmask across the workers */
-    distribute_map(pixel, nmaps, 0, nstokes, first_ring, last_ring, map_size,
-            local_map, map, myrank, nprocs, 0, MPI_COMM_WORLD);
-    distribute_map(pixel, nmaps, 0, 1, first_ring, last_ring, map_size,
-            local_apmask, apmask, myrank, nprocs, 0, MPI_COMM_WORLD);
-
-    /* Define the map weighting. We assume uniform weighting is OK, and any
-     * weighting (i.e. apodization) has occurred by the caller already. */
     tmp = (last_ring-first_ring+1)*nstokes;
     local_w8ring = (double*)calloc(tmp, sizeof(double));
     if (local_w8ring == NULL) {
@@ -301,8 +317,23 @@ int map2almpure(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
         ret = -1;
         goto cleanup;
     }
-    for (size_t ii=0; ii<tmp; ++ii) {
-        local_w8ring[ii] = 1.0;
+
+    /* Spread the map and apmask across the workers */
+    distribute_map(pixel, nmaps, 0, nstokes, first_ring, last_ring, map_size,
+            local_map, map, myrank, nprocs, 0, MPI_COMM_WORLD);
+    distribute_map(pixel, nmaps, 0, 1, first_ring, last_ring, map_size,
+            local_apmask, apmask, myrank, nprocs, 0, MPI_COMM_WORLD);
+    /* We only accept a single ring weight vector that applies to all Stokes
+     * parameters, but s2hat_map2purealm wants a buffer for each parameter.
+     * Therefore, duplicate as necessary. */
+    for (int ii=0; ii<nstokes; ++ii) {
+        /* local_w8ring stores as (rings,stokes), compute a pointer to the
+         * first element in each stokes parameters (assuming column-major
+         * storage). */
+        double* stokes_w8 = local_w8ring + ii*(last_ring-first_ring+1);
+        /* Then broadcast the single weight ring into the local weights */
+        distribute_w8ring(1, first_ring, last_ring, stokes_w8,
+                pixel.nringsall, qwghts, myrank, nprocs, 0, MPI_COMM_WORLD);
     }
 
     /* Then allocate enough space for the local part of the alm array to work

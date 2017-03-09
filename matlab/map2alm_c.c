@@ -17,7 +17,7 @@
 #include <matrix.h>
 
 int map2alm(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
-            int nmaps, double* map, int nside);
+            int nmaps, double* map, int nside, double* qwghts);
 
 /*
  * alms = map2alm(map, lmax, mmax);
@@ -29,6 +29,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
     const mxArray* ml_map = NULL;
     const mxArray* ml_lmax = NULL;
     const mxArray* ml_mmax = NULL;
+    const mxArray* ml_qwghts = NULL;
 
     /* Outputs back to Matlab */
     mxArray* ml_alms = NULL;
@@ -49,15 +50,16 @@ void mexFunction(int nlhs, mxArray* plhs[],
     int npix = 0;
     s2hat_dcomplex* alms = NULL;
     double* map = NULL;
+    double* qwghts = NULL;
 
     /* Initialize MPI if necessary */
     mexCallMATLAB(0, NULL, 0, NULL, "mpihelper");
 
     /* Validate MATLAB inputs */
     dbglog("Validating MATLAB inputs...\n");
-    if (nrhs != 3) {
+    if (nrhs != 4) {
         mexErrMsgIdAndTxt("map2alm:args:nrhs",
-                "Three input arguments are required");
+                "Four input arguments are required");
     }
 
     if (nlhs != 1) {
@@ -88,6 +90,17 @@ void mexFunction(int nlhs, mxArray* plhs[],
                 "Input mmax must be a scalar of type int32");
     }
 
+    ml_qwghts = prhs[3];
+    if (!mxIsDouble(ml_qwghts) || mxIsComplex(ml_qwghts)) {
+        mexErrMsgIdAndTxt("map2almpure:args:notDouble",
+                "Input qwghts must be real and of type double");
+    }
+    tmp_ndim = mxGetNumberOfDimensions(ml_qwghts);
+    if (tmp_ndim != 2) {
+        mexErrMsgIdAndTxt("map2almpure:args:dims",
+                "Input qwghts must have 2 dimensions");
+    }
+
     /* Retrieve information from the given inputs */
 
     /* Determine the number of components, nside, and number of maps from the
@@ -115,6 +128,15 @@ void mexFunction(int nlhs, mxArray* plhs[],
                 sqrt((double)npix/12.0));
     }
 
+    /* Make sure the quadrature weights vector has correct dimensions */
+    tmp_ndim = mxGetNumberOfDimensions(ml_qwghts);
+    tmp_dims = mxGetDimensions(ml_qwghts);
+    if (tmp_dims[0] != 2*nside || tmp_dims[1] != 1) {
+        mexErrMsgIdAndTxt("map2almpure:args:sizeMismatch",
+                "Input qwghts must be an array of size (%d, 1). Got"
+                "size (%d, %d).", 2*nside, tmp_dims[0], tmp_dims[1]);
+    }
+
     /* Get the nlmax and nmmax for the output alms */
     lmax = *((int32_t*)mxGetData(ml_lmax));
     mmax = *((int32_t*)mxGetData(ml_mmax));
@@ -129,7 +151,8 @@ void mexFunction(int nlhs, mxArray* plhs[],
 
     /* For a plain double array, we can re-use the same buffer that Matlab
      * has allocated */
-    map = (double*)mxGetData(ml_map);
+    map    = (double*)mxGetData(ml_map);
+    qwghts = (double*)mxGetData(ml_qwghts);
 
     /* Allocate the s2hat compatible complex array */
     tmp_ndim = nstokes * (lmax+1) * (mmax+1);
@@ -140,7 +163,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
     }
 
     dbglog("Running map2alm...\n");
-    int ret = map2alm(alms, nstokes, lmax, mmax, nmaps, map, nside);
+    int ret = map2alm(alms, nstokes, lmax, mmax, nmaps, map, nside, qwghts);
 
     /* Convert from s2hat complex numbers to Matlab format */
     ml_alms_r = mxGetPr(ml_alms);
@@ -158,7 +181,7 @@ void mexFunction(int nlhs, mxArray* plhs[],
 }
 
 int map2alm(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
-            int nmaps, double* map, int nside)
+            int nmaps, double* map, int nside, double* qwghts)
 {
     int ret = 0;
     /* Process communications */
@@ -195,7 +218,7 @@ int map2alm(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
     bounds[1] =  1.0;
     zbounds2scan(bounds, pixel, &scan);
 
-    /* To work in a distrubted fashion, we need to know the sizes of the
+    /* To work in a distributed fashion, we need to know the sizes of the
      * various data sets' local size. */
     get_local_data_sizes(0, pixel, scan, lmax, mmax, myrank, nprocs,
             &nmvals, &first_ring, &last_ring, &map_size, &nplm,
@@ -209,20 +232,14 @@ int map2alm(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
     }
     find_mvalues(myrank, nprocs, mmax, nmvals, mvals);
 
-    /* Make enough space for us hold the local portion of the map */
+    /* Make enough space for us hold the local portion of the map and ring
+     * weights */
     local_map = (double*)calloc(map_size*nstokes*nmaps, sizeof(double));
     if (local_map == NULL) {
         perror("alloc local_map");
         ret = -1;
         goto cleanup;
     }
-
-    /* Spread the map across the workers */
-    distribute_map(pixel, nmaps, 0, nstokes, first_ring, last_ring, map_size,
-            local_map, map, myrank, nprocs, 0, MPI_COMM_WORLD);
-
-    /* Define the map weighting. We assume uniform weighting is OK, and any
-     * weighting (i.e. apodization) has occurred by the caller already. */
     tmp = (last_ring-first_ring+1)*nstokes;
     local_w8ring = (double*)calloc(tmp, sizeof(double));
     if (local_w8ring == NULL) {
@@ -230,8 +247,21 @@ int map2alm(s2hat_dcomplex* alms, int nstokes, int lmax, int mmax,
         ret = -1;
         goto cleanup;
     }
-    for (size_t ii=0; ii<tmp; ++ii) {
-        local_w8ring[ii] = 1.0;
+
+    /* Spread the map across the workers */
+    distribute_map(pixel, nmaps, 0, nstokes, first_ring, last_ring, map_size,
+            local_map, map, myrank, nprocs, 0, MPI_COMM_WORLD);
+    /* We only accept a single ring weight vector that applies to all Stokes
+     * parameters, but s2hat_map2alm wants a buffer for each parameter.
+     * Therefore, duplicate as necessary. */
+    for (int ii=0; ii<nstokes; ++ii) {
+        /* local_w8ring stores as (rings,stokes), compute a pointer to the
+         * first element in each stokes parameters (assuming column-major
+         * storage). */
+        double* stokes_w8 = local_w8ring + ii*(last_ring-first_ring+1);
+        /* Then broadcast the single weight ring into the local weights */
+        distribute_w8ring(1, first_ring, last_ring, stokes_w8,
+                pixel.nringsall, qwghts, myrank, nprocs, 0, MPI_COMM_WORLD);
     }
 
     /* Then allocate enough space for the local part of the alm array to work
