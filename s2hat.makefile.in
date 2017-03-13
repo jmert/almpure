@@ -34,14 +34,21 @@ ifneq (,$(filter $(FFTPKG),FFTW3_HC2R FFTW3_C2R))
 	FFTW_STATIC = $(shell $(CC) $(LDFLAGS) --print-file-name=libfftw3.a)
 endif
 
-# Ordered list of objects to compile. The order is important since the Fortran
-# module files from a prior compile may be required by a later compilation
-# unit.
 OBJECTS = \
 	s2hat_defs.o s2hat_types_internal.o s2hat_pixelization.o \
 	s2hat_toolbox.o s2hat_alm2map.o s2hat_map2alm.o \
 	s2hat_c_interface.o s2hat_c_wrappers.o \
 	s2hat_map2purealm.o
+# Dependencies on building particular objects. The object list above is
+# ordered sufficiently to build serially, but the rules below are required
+# to permit multi-threaded builds (i.e. -j4)
+s2hat_alm2map.o: s2hat_toolbox.o s2hat_types_internal.o
+s2hat_c_interface.o: s2hat_alm2map.o s2hat_map2alm.o s2hat_pixelization.o \
+					 s2hat_pixelization.o
+s2hat_map2alm.o: s2hat_alm2map.o s2hat_toolbox.o s2hat_types_internal.o
+s2hat_pixelization.o: s2hat_types_internal.o
+s2hat_toolbox.o: s2hat_types_internal.o
+s2hat_types_internal.o: s2hat_defs.o
 
 .PHONY: clean
 
