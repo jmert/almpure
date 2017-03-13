@@ -1,5 +1,5 @@
-function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
-% [cl,dl]=alm2cl(map,apmask,lmax,mmax)
+function [cl,dl]=powspec(map,apmask,lmax,mmax,qwghts,pure)
+% [cl,dl]=alm2cl(map,apmask,lmax,mmax,qwghts,pure)
 %
 % Computes the 6 (or 9) auto- and cross-spectra of the given T, Q, and U maps
 %
@@ -23,6 +23,9 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
 %   mmax     Maximum m-mode to decompose, where 0 <= nmmax <= nlmax. If not
 %            given or empty, then nmmax = nlmax.
 %
+%   qwghts   Optional, defaults to []. Ring quadrature weights to pass to
+%            map2alm[pure]. See map2alm() for more info.
+%
 %   pure     Optional, defaults to true. If true, Q/U -> E/B is performed by
 %            calling map2almpure(), otherwise by map2alm().
 %
@@ -37,6 +40,9 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
 
   if ~exist('mmax','var') || isempty(mmax)
     mmax = lmax;
+  end
+  if ~exist('qwghts','var')
+    qwghts = [];
   end
   if ~exist('pure','var') || isempty(pure)
     pure = true;
@@ -84,12 +90,14 @@ function [cl,dl]=powspec(map,apmask,lmax,mmax,pure)
     masksel = min(size(apmask,3), ii);
 
     if pure
-      almsT{ii} = map2alm(    map(:,1,ii),   apmask(:,1,masksel), lmax, mmax);
-      almsP{ii} = map2almpure(map(:,2:3,ii), apmask(:,2,masksel), lmax, mmax);
+      almsT{ii} = map2alm(    map(:,1,ii),   apmask(:,1,masksel), ...
+          lmax, mmax, qwghts);
+      almsP{ii} = map2almpure(map(:,2:3,ii), apmask(:,2,masksel), ...
+          lmax, mmax, qwghts);
     else
       tmpmask = cat(2, apmask(:,1,masksel), ...
                        apmask(:,2,masksel), apmask(:,2,masksel));
-      tmpalm  = map2alm(map(:,:,ii), tmpmask, lmax, mmax);
+      tmpalm  = map2alm(map(:,:,ii), tmpmask, lmax, mmax, qwghts);
       clear tmpmask
       almsT{ii} = tmpalm(1,  :,:);
       almsP{ii} = tmpalm(2:3,:,:);
