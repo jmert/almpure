@@ -1,5 +1,5 @@
-function map=alm2map(alms,nside)
-% map=alm2map(alms,nside)
+function map=s2hat_alm2map(alms,nside)
+% map=s2hat_alm2map(alms,nside)
 %
 % Generates maps given a set of alms using the S2HAT library.
 %
@@ -39,7 +39,7 @@ function map=alm2map(alms,nside)
 %   hmap.nside = nside;
 %   hmap.ordering = 'ring';
 %   hmap.pixel = 1:nside2npix(nside);
-%   hmap.map = alm2map(alms, nside);
+%   hmap.map = s2hat_alm2map(alms, nside);
 %
 
   if ~exist('nside','var') || isempty(nside)
@@ -58,6 +58,6 @@ function map=alm2map(alms,nside)
     error('nmaps > 1 is not yet supported')
   end
 
-  map = alm2map_c(alms, int32(nside));
+  map = s2hat_alm2map_c(alms, int32(nside));
 end
 

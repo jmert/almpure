@@ -1,23 +1,27 @@
-function alms=map2almpure(map,apmask,lmax,mmax,qwghts)
-% alms=map2almpure(map,apmask,lmax,mmax)
+function alms=s2hat_map2alm(map,apmask,lmax,mmax,qwghts)
+% alms=s2hat_map2alm(map,apmask,lmax,mmax,qwghts)
 %
-% Decomposes the given map into Smith-style "pure" alms using the PS2HAT
-% library
+% Decomposes the given map into alms using the S2HAT library.
 %
 % INPUTS
 %
 %   map      A 3-D array of full-sky map pixels (stored in ring ordering) for
-%            two Stokes (Q and U) parameters. The dimensions are expected to
-%            be size (npix, 2, nmaps) where each of the values means:
+%            up to three Stokes parameters. The dimensions are expected to be
+%            size (npix, nstokes, nmaps) where each of the values means:
 %
 %              npix     Number of pixels in a full-sky map. This is used to
 %                       automatically determine the HEALPix nside.
 %
+%              nstokes  Number of Stokes parameters available. Should be
+%                       either 1 or 3.
+%
 %              nmaps    Number of distinct maps
 %                       Note! nmaps ~= 1 is not yet supported.
 %
-%   apmask   Apodization masks of size (npix, nmaps) corresponding to the
-%            mask to be applied to map.
+%   apmask   Apodization masks of size (npix, 1, nmaps) in which case the mask
+%            is applied to all stokes parameters for each map or size
+%            (npix, nstokes, nmaps) for independent masks. If empty, no extra
+%            apodization is applied.
 %
 %   lmax     Maximum l-mode to decompose.
 %
@@ -31,12 +35,15 @@ function alms=map2almpure(map,apmask,lmax,mmax,qwghts)
 %
 % OUTPUTS
 %
-%   alms     E and B alms for the decomposed maps. Dimensions will be
-%            (2,lmax+1,mmax+1,nmaps).
+%   alms     alms for the decomposed maps. Dimensions will be
+%            (nstokes,lmax+1,mmax+1,nmaps).
 %
 % EXAMPLE
 %
 
+  if ~exist('apmask','var') || isempty(apmask)
+    apmask = ones(size(map));
+  end
   if ~exist('mmax','var') || isempty(mmax)
     mmax = lmax;
   end
@@ -44,17 +51,15 @@ function alms=map2almpure(map,apmask,lmax,mmax,qwghts)
   if ~any(ndims(map) == [2 3])
     error('map must have 2 or 3 dimensions')
   end
-  if ndims(apmask) ~= 2
-    error('apmask must have 2 dimensions')
-  end
 
   npix    = size(map, 1);
   nstokes = size(map, 2);
   nmaps   = size(map, 3);
 
-  if nstokes ~= 2
-    error('expected map for 2 Stokes parameters')
+  if nstokes ~= 1 && nstokes ~= 3
+    error('expected map for 1 or 3 Stokes parameters')
   end
+
   if nmaps ~= 1
     error('nmaps > 1 is not yet supported')
   end
@@ -62,7 +67,10 @@ function alms=map2almpure(map,apmask,lmax,mmax,qwghts)
   if npix ~= size(apmask,1)
     error('map and apmask must have same number of pixels')
   end
-  if nmaps ~= size(apmask,2)
+  if nstokes ~= size(apmask,2) && size(apmask,2) ~= 1
+    error('map and apmask have incompatible number of stokes parameters')
+  end
+  if nmaps ~= size(apmask,3)
     error('map and apmask must have the same number of maps')
   end
 
@@ -92,8 +100,13 @@ function alms=map2almpure(map,apmask,lmax,mmax,qwghts)
     error('qwghts must have dimension 2 of length 1')
   end
 
-  % Do not apodize the map. map2almpure_c internally does this
-  % itself.
-  alms = map2almpure_c(map, apmask, int32(lmax), int32(mmax), qwghts);
+  if ~all(cvec(apmask == 1))
+    % Apply the apodization mask before sending to map2alm_c, if one was
+    % provided. This is mainly for symmetry with map2almpure which requires
+    % an apodization mask be provided.
+    map = bsxfun(@times, map, apmask);
+  end
+
+  alms = s2hat_map2alm_c(map, int32(lmax), int32(mmax), qwghts);
 end
 

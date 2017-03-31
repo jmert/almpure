@@ -20,7 +20,8 @@ LINKLIBS += $(shell mpifort --showme:link)
 
 .PHONY: clean
 
-all: mpihelper.mexa64 alm2map_c.mexa64 map2alm_c.mexa64 map2almpure_c.mexa64
+all: mpihelper.mexa64 s2hat_alm2map_c.mexa64 s2hat_map2alm_c.mexa64 \
+     s2hat_map2almpure_c.mexa64
 
 %.mexa64: %.c
 	mex $(MFLAGS) -output $@ CFLAGS='$$CFLAGS $(CFLAGS)' LINKLIBS='$$LINKLIBS $(LINKLIBS)' $^
