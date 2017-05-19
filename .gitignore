@@ -5,10 +5,14 @@
 *.swo
 
 # Ignore autotools outputs
+/aclocal.m4
 /autom4te.cache/
 /config.status
 /config.log
 /configure
+/config.h
+/config.h.in
+/config.h.in~
 /s2hat/Makefile
 
 # Ignore build products

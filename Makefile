@@ -30,5 +30,6 @@ cleanall: clean
 	make -C s2hat clean
 
 distclean: cleanall
-	rm -fr autom4te.cache
+	rm -fr aclocal.m4 autom4te.cache
 	rm -f configure config.log config.status
+	rm -f config.h config.h.in config.h.in~
