@@ -1,0 +1,22 @@
+set echo
+
+# Example compilation script for IBM SP platforms using FFTW3 hc2r FFTransforms
+
+setenv FFTPATH '-L... -I...'    # provide appropriate paths to FFTW3 library
+
+setenv CFLAGS '-O3 -qstrict -q64 -qcpluscmt'
+setenv DFLAGS '-WF,-DSP3,-DMAXCHK=1500,-DFFTW3_HC2R'
+setenv FFLAGS '-O3  -qstrict -qsuffix=f=f90:cpp=F90 -q64'
+
+mpxlf90 $FFLAGS -c s2hat_defs.f90 -qsuffix=f=f90:cpp=F90
+mpxlf90 $DFLAGS $FFLAGS $FFTWPATH -c s2hat_types_internal.F90 -qsuffix=f=f90:cpp=F90
+mpxlf90 $FFLAGS -c s2hat_pixelization.f90 -qsuffix=f=f90:cpp=F90
+mpxlf90 $DFLAGS $FFLAGS $FFTWPATH -c s2hat_toolbox.F90 -qsuffix=f=f90:cpp=F90
+mpxlf90 $FFLAGS -c s2hat_alm2map.f90 -qsuffix=f=f90:cpp=F90
+mpxlf90 $DFLAGS $FFLAGS -c s2hat_map2alm.F90 -qsuffix=f=f90:cpp=F90
+mpxlf90 $FFLAGS -c s2hat_c_interface.f90 -qsuffix=f=f90:cpp=F90
+
+mpcc $CFLAGS -c s2hat_c_wrappers.c
+
+ar -X64 rv libs2hat_hc2r.a s2hat_alm2map.o s2hat_c_interface.o s2hat_c_wrappers.o s2hat_defs.o s2hat_map2alm.o s2hat_pixelization.o s2hat_toolbox.o s2hat_types_internal.o
+

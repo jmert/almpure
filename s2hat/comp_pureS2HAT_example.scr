@@ -1,0 +1,14 @@
+
+
+set echo 
+
+setenv FFLAGS '-DFFTW3_HC2R -fast -Dopteron -DMPICH -fastsse -fPIC -Mcache_align -mp=nonuma -DpgiFortran -DMACH_F77_APPEND_UNDERSCORE -DMACH_MPI_FORCEBLOCK -DMINIMAL_LIBC -mp=nonuma -lm -pgf90libs -pgf77libs'
+
+setenv FFTW3 '-I/project/projectdirs/cmb/modules/franklin/pgi/cmb/2.3.1/fftw3_3.1.2-2.3.1/include/ -L/project/projectdirs/cmb/modules/franklin/pgi/cmb/2.3.1/fftw3_3.1.2-2.3.1/lib/'
+
+setenv S2HAT_FFTW_HC2R '-I/global/u2/r/radek/s2hat/include/franklin/fftw-hc2r/ -L/global/u2/r/radek/s2hat/lib/franklin/'
+
+cc  $FFLAGS $FFTW3 $S2HAT_FFTW_HC2R -c s2hat_map2purealm.c
+
+#
+

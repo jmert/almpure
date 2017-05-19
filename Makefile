@@ -13,7 +13,6 @@ all: s2hat
 .PHONY: s2hat matlab clean cleanall
 
 s2hat:
-	@./setup.sh
 	make -C s2hat
 
 matlab: | s2hat

@@ -1,0 +1,14 @@
+
+# compilation script of the demonstration code s2hat_example.* using FFTW3 library for FFTs and PGI compilers
+
+set echo 
+
+setenv FLAGS '-DFFTW3_hc2r' -fast -Dopteron -DMPICH -fastsse -fPIC -Mcache_align -mp=nonuma -DpgiFortran -DMACH_F77_APPEND_UNDERSCORE -DMACH_MPI_FORCEBLOCK -DMINIMAL_LIBC -mp=nonuma -lm -pgf90libs -pgf77libs'
+setenv FFTW3 '-I ... -L ...'     # FFTW library info
+setenv S2HAT_FFTW3-HC2R '-I ... -L ...' # S2HAT using FFTW3-HC2R FFT transforms
+
+mpif90 $FLAGS $S2HAT_FFTW3-HC2R -o s2hat_f90_example.x s2hat_example.f90 -ls2hat_fftw-hc2r -lfftw3 -ls2hat_fftw-hc2r
+mpicc  $FLAGS $S2HAT_FFTW3-HC2R -o s2hat_c_example.x s2hat_example.c -ls2hat_fftw-hc2r -lfftw3 -ls2hat_fftw-hc2r
+
+#
+

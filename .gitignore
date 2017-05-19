@@ -1,6 +1,3 @@
-s2hat/
-*.tar.gz
-
 # Editors
 #
 # vim
@@ -12,4 +9,8 @@ s2hat/
 /config.status
 /config.log
 /configure
-/s2hat.makefile
+/s2hat/Makefile
+
+# Ignore build products
+/s2hat/*.o
+/s2hat/*.mod

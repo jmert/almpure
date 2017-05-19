@@ -1,3 +1,6 @@
+# Build script written by Justin Willmert and is not part of the original
+# S2HAT/PS2HAT libraries.
+
 # Choose CPU platform:
 #   SP3, T3E, SX5, O2K, opteron, powermac, x86_32, x86_64
 PLATFORM := x86_64

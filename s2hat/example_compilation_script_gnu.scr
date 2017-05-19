@@ -1,0 +1,21 @@
+
+# compilation script of s2hat_example.* demonstration codes using s2hat library with HEALPIX FFTs
+
+export FFLAGS="-O3 -std=gnu -fno-second-underscore -ffixed-line-length-none -ffree-line-length-none"
+
+export LIBHEAL = ...   # Healpix
+export LIBFITS = ...   # cfitsio library
+export LIBS2HAT= ...   # location of libs2hat_hlpx.a library file
+
+export INCHEAL = ...   # Healpix
+export INCFITS = ...   # CFITSIO
+export INCS2HAT = ...  # s2hat
+
+export CFLAGS="-O3" 
+export DFLAGS="-DGFORTRAN -DFITS -Dopteron"
+
+mpif90 $FFLAGS -L$LIBHEAL -L$LIBFITS -L$LIBS2HAT  -I$INCHEAL -I$INCFITS -I$INCS2HAT -o s2hat_f90_example.x s2hat_example.f90 -ls2hat_hlpx \
+-fopenmp -lhealpix -lchealpix -lcfitsio -lblas -lm -lmpi_f90 -lmpi_f77
+
+mpicc $CFLAGS $DFLAGS -L$LIBHEAL -L$LIBFITS -L$LIBS2HAT  -I$INCHEAL -I$INCFITS -I$INCS2HAT -o s2hat_c_example.x s2hat_example.c -ls2hat_hlpx \
+-fopenmp -lhealpix -lchealpix -lcfitsio -lblas -lm -lmpi_f90 -lmpi_f77 -lg2c

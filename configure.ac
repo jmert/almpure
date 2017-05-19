@@ -36,7 +36,7 @@ AX_MPI([], [AC_ERROR([A C MPI compiler is required])])
 
 
 SECTION_TITLE([Configuration results])
-AC_CONFIG_FILES([s2hat.makefile])
+AC_CONFIG_FILES([s2hat/Makefile])
 AC_OUTPUT
 
 echo "CC=$CC" >&AS_MESSAGE_FD

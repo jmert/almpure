@@ -1,0 +1,24 @@
+
+set echo 
+
+# Example compilation script for Opteron processors and using FFTW3 hc2r FFTransforms
+
+setenv FFTPATH '-I... -L...'   # provide appropriate paths
+
+setenv DFLAGS '-Dopteron -DMAXCHK=1500  -DFFTW3_HC2R'
+
+setenv FFLAGS '-fast -fastsse -fPIC -Mcache_align -mp=nonuma -DpgiFortran -DMACH_F77_APPEND_UNDERSCORE -DMACH_MPI_FORCEBLOCK -DMINIMAL_LIBC -mp=nonuma'
+
+setenv CFLAGS '-fast -Dopteron -DMPICH -fastsse -fPIC -Mcache_align -mp=nonuma -DpgiFortran -DMACH_F77_APPEND_UNDERSCORE -DMACH_MPI_FORCEBLOCK -DMINIMAL_LIBC -mp=nonuma'
+
+ftn $DFLAGS $FFLAGS  -c s2hat_defs.f90
+ftn $DFLAGS $FFLAGS $FFTPATH -c s2hat_types_internal.F90
+ftn $DFLAGS $FFLAGS  -c s2hat_pixelization.f90
+ftn $DFLAGS $FFLAGS $FFTPATH  -c s2hat_toolbox.F90
+ftn $DFLAGS $FFLAGS  -c s2hat_alm2map.f90
+ftn $DFLAGS $FFLAGS  -c s2hat_map2alm.F90
+ftn $DFLAGS $FFLAGS  -c s2hat_c_interface.f90
+
+cc $CFLAGS -c s2hat_c_wrappers.c
+
+ar rv libs2hat_fftw-hc2r.a s2hat_alm2map.o s2hat_c_interface.o s2hat_c_wrappers.o s2hat_defs.o s2hat_map2alm.o s2hat_pixelization.o s2hat_toolbox.o s2hat_types_internal.o

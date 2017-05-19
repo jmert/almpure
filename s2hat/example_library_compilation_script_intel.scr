@@ -1,0 +1,28 @@
+
+set echo 
+
+# Example compilation script for intel compilers : from Sam Leach (SISSA/Trieste)
+
+setenv FFTPATH '-I/opt/fftw/3.2.2/intel/include/ -L/opt/fftw/3.2.2/intel/lib/'
+
+setenv DFLAGS '-Dx86_64 -DMAXCHK=1500 -DFFTW3_HC2R'
+
+setenv FFLAGS '-DOPEN_MPI'
+
+setenv CFLAGS '-Dx86_64 -DOPEN_MPI -lmpi_f77 -L/opt/intel/fce/10.1.018/lib/ -lifcore'
+
+mpif90 $DFLAGS $FFLAGS  -c s2hat_defs.f90
+mpif90 $DFLAGS $FFLAGS $FFTPATH -c s2hat_types_internal.F90
+mpif90 $DFLAGS $FFLAGS  -c s2hat_pixelization.f90
+mpif90 $DFLAGS $FFLAGS $FFTPATH  -c s2hat_toolbox.F90
+mpif90 $DFLAGS $FFLAGS  -c s2hat_alm2map.f90
+mpif90 $DFLAGS $FFLAGS  -c s2hat_map2alm.F90
+mpif90 $DFLAGS $FFLAGS  -c s2hat_c_interface.f90
+
+mpicc $CFLAGS -c s2hat_c_wrappers.c
+
+ar rv libs2hat.a s2hat_alm2map.o s2hat_c_interface.o s2hat_c_wrappers.o s2hat_defs.o s2hat_map2alm.o s2hat_pixelization.o s2hat_toolbox.o s2hat_types_internal.o
+
+
+mpif90 $FFLAGS $FFTPATH -o s2hat_f90_example.x s2hat_example.f90 -lfftw3 -L. -ls2hat
+mpicc  $CFLAGS $FFTPATH  -o s2hat_c_example.x s2hat_example.c -lfftw3 -L. -ls2hat

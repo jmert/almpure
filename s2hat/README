@@ -1,0 +1,35 @@
+The files in this directory are the contents of the S2HAT and pureS2HAT
+(PS2HAT) source archives, downloaded on 2016 Apr 11.
+
+S2HAT:
+    http://www.apc.univ-paris7.fr/APC_CS/Recherche/Adamis/MIDAS09/software/s2hat/s2hat.html
+    version: v2.55beta_30april2012
+
+PS2HAT:
+    http://www.apc.univ-paris7.fr/APC_CS/Recherche/Adamis/MIDAS09/software/pures2hat/pureS2HAT.html
+    version: v1.1beta_24feb2010
+
+S2HAT has the following license:
+
+    S2HAT is free software; you can redistribute it and/or modify it under the
+    terms of the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any later
+    version. S2HAT is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+    more details. You should have received a copy of the GNU General Public
+    License along with S2HAT; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+PS2HAT has the following license:
+
+    pureS2HAT is free software; you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free
+    Software Foundation; either version 2 of the License, or (at your option)
+    any later version. S2HAT is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+    Public License for more details.  You should have received a copy of the
+    GNU General Public License along with S2HAT; if not, write to the Free
+    Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+    02110-1301 USA 
