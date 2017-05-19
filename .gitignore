@@ -13,8 +13,14 @@
 /config.h
 /config.h.in
 /config.h.in~
+/stamp-h1
+/Makefile
 /s2hat/Makefile
 
 # Ignore build products
-/s2hat/*.o
+/s2hat/*.lo
 /s2hat/*.mod
+/s2hat/*.o
+/s2hat/*.obj
+/s2hat/.deps/
+/s2hat/.libs/

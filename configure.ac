@@ -1,18 +1,8 @@
-AC_INIT(almpure, version-0.1)
-AC_CONFIG_HEADERS([config.h])
-
-m4_include([m4/ax_mpi.m4])
-
-AC_PROG_CPP
-AC_PROG_RANLIB
+AC_INIT([almpure], [0.1])
+AC_CONFIG_AUX_DIR([config])
 
 dnl Take some tricks from
 dnl   https://github.com/edrosten/autoconf_tutorial
-
-    dnl Force the compiler to run once and do all the basic checks
-    dnl if you don't, it will do the test on the first invocation
-    dnl below and so your pretty section titles won't work as well
-    AC_CHECK_HEADERS(string.h)
 
     dnl Small macro to print out a nice, pretty section title.
     define(SECTION_TITLE,
@@ -24,17 +14,41 @@ dnl   https://github.com/edrosten/autoconf_tutorial
     ])
 
 
-SECTION_TITLE([Configuring Fortran MPI])
-AC_LANG(Fortran)
-AX_MPI([], [AC_ERROR([A Fortran MPI compiler is required])])
+
+SECTION_TITLE([Configuring build environment])
+AC_CONFIG_SRCDIR([s2hat/s2hat.h])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIRS([m4])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_SILENT_RULES([yes])
+AM_PROG_AR
+LT_INIT
 
 
 
 SECTION_TITLE([Configuring C MPI])
-AC_LANG(C)
+AC_LANG_PUSH(C)
+AC_PROG_CC
 AX_MPI([], [AC_ERROR([A C MPI compiler is required])])
+AC_LANG_POP(C)
 
 
+
+SECTION_TITLE([Configuring Fortran MPI])
+AC_LANG_PUSH(Fortran)
+AC_PROG_FC
+AX_MPI([], [AC_ERROR([A Fortran MPI compiler is required])])
+AC_FC_FREEFORM
+AC_FC_LINE_LENGTH([unlimited])
+AC_FC_PP_DEFINE
+AC_FC_MODULE_EXTENSION
+AC_FC_LIBRARY_LDFLAGS
+AC_LANG_POP(Fortran)
+AM_CONDITIONAL([KNOWN_MODEXT], [test x"$FC_MODEXT" != x""])
+
+
+dnl For the rest of the configuring, go back to using a C compiler
+AC_LANG(C)
 
 SECTION_TITLE([Configuring FFT libraries])
 AC_ARG_WITH([healpix],
@@ -46,14 +60,14 @@ AC_ARG_WITH([fftw3],
     [],
     [with_fftw3=yes])
 
-# Check for appropriate libraries given the choice of FFT package requested.
-# By default we check for all available options, but prefer to use libfftw3
-# with full complex support by overriding in order each time a check
-# succeeds.
+dnl Check for appropriate libraries given the choice of FFT package requested.
+dnl By default we check for all available options, but prefer to use libfftw3
+dnl with full complex support by overriding in order each time a check
+dnl succeeds.
 
-# The S2HAT preprocessor define to use
+dnl The S2HAT preprocessor define to use
 WITH_FFT=
-# Appropriate flags for each choice of FFT library
+dnl Appropriate flags for each choice of FFT library
 FFT_CFLAGS=
 FFT_LIBS=
 
@@ -100,16 +114,21 @@ AC_SUBST([WITH_FFT])
 
 
 SECTION_TITLE([Configuration results])
-AC_CONFIG_FILES([s2hat/Makefile])
+AC_CONFIG_FILES([
+    Makefile
+    s2hat/Makefile
+    ])
 AC_OUTPUT
 
-echo "CC=$CC" >&AS_MESSAGE_FD
-echo "MPICC=$MPICC" >&AS_MESSAGE_FD
-echo "CFLAGS=$CFLAGS $FFT_CFLAGS" >&AS_MESSAGE_FD
-echo "FC=$FC" >&AS_MESSAGE_FD
-echo "MPIFC=$MPIFC" >&AS_MESSAGE_FD
-echo "FCFLAGS=$FCFLAGS" >&AS_MESSAGE_FD
-echo "MPILIBS=$MPILIBS" >&AS_MESSAGE_FD
-echo "LDFLAGS=$LDFLAGS" >&AS_MESSAGE_FD
-echo "LIBS=$FFT_LIBS" >&AS_MESSAGE_FD
+echo "CC      = $CC" >&AS_MESSAGE_FD
+echo "MPICC   = $MPICC" >&AS_MESSAGE_FD
+echo "CFLAGS  = $CFLAGS $FFT_CFLAGS" >&AS_MESSAGE_FD
+echo "FC      = $FC" >&AS_MESSAGE_FD
+echo "MPIFC   = $MPIFC" >&AS_MESSAGE_FD
+echo "FLIBS   = $FLIBS" >&AS_MESSAGE_FD
+echo "FCLIBS  = $FCLIBS" >&AS_MESSAGE_FD
+echo "FCFLAGS = $FCFLAGS" >&AS_MESSAGE_FD
+echo "MPILIBS = $MPILIBS" >&AS_MESSAGE_FD
+echo "LDFLAGS = $LDFLAGS" >&AS_MESSAGE_FD
+echo "LIBS    = $FFT_LIBS" >&AS_MESSAGE_FD
 
