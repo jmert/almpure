@@ -27,8 +27,7 @@ $ cd almpure
 $ source support/odyssey_env.sh
 ```
 
-Then configure and compile the library. An internet connection is required to
-download the (P)S2HAT code for compilation.
+Then configure and compile the library:
 
 ```bash
 $ autoconf

@@ -10,7 +10,7 @@ LDFLAGS += $(shell mpifort --showme:link)
 
 all: s2hat
 
-.PHONY: s2hat matlab clean cleanall
+.PHONY: s2hat matlab clean cleanall distclean
 
 s2hat:
 	make -C s2hat
@@ -29,3 +29,6 @@ clean:
 cleanall: clean
 	make -C s2hat clean
 
+distclean: cleanall
+	rm -fr autom4te.cache
+	rm -f configure config.log config.status
