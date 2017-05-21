@@ -1,3 +1,7 @@
+# Because of Fortran's mod files not being dependency trackable, we cannot
+# support parallel builds in this directory. Disable parallel building.
+.NOTPARALLEL:
+
 CC = @MPICC@
 FC = @MPIFC@
 DD = @FC_DEFINE@
@@ -12,8 +16,11 @@ AM_FCFLAGS += $(DD)x86_64 $(DD)@WITH_FFT@ $(DD)OPEN_MPI
 
 lib_LTLIBRARIES = libs2hat.la
 
+# Install s2hat C headers and Fortran module files using custom target
+# and path. (Fortran only if the module extension is known.)
 cincdir = $(includedir)/s2hat
 fmoddir = $(includedir)/s2hat
+
 
 cinc_HEADERS = \
 	s2hat.h \
@@ -30,7 +37,12 @@ nodist_fmod_HEADERS = \
 	s2hat_pixelization.$(MOD) \
 	s2hat_toolbox_mod.$(MOD) \
 	s2hat_types_internal.$(MOD)
-endif
+
+mostlyclean-local:: mostlyclean-mods
+mostlyclean-mods:
+	rm -f *.$(MOD)
+
+endif #KNOWN_MODEXT
 
 libs2hat_la_DEPENDENCIES = $(cinc_HEADERS)
 
@@ -45,3 +57,5 @@ libs2hat_la_SOURCES = \
 	s2hat_c_wrappers.c \
 	s2hat_map2purealm.c
 
+# Generate links for the built libraries automatically.
+include $(top_srcdir)/convenience-link.mk

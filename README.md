@@ -30,13 +30,10 @@ $ source support/odyssey_env.sh
 Then configure and compile the library:
 
 ```bash
-$ autoconf
+$ autoreconf -vi
 $ ./configure
 $ make
 ```
-
-> The use of `autoconf` is in a very preliminary state, so not all features
-> typically available with the `configure`/`make` pattern are available.
 
 ### Compiling Matlab bindings
 
