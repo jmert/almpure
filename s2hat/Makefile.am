@@ -7,9 +7,9 @@ FC = @MPIFC@
 DD = @FC_DEFINE@
 
 # Generic build options
-AM_CFLAGS =
-AM_FCFLAGS = -fno-second-underscore
-AM_LDFLAGS = @FCLIBS@
+AM_CFLAGS = @FFTW3_CFLAGS@
+AM_FCFLAGS = @FFTW3_FCFLAGS@ -fno-second-underscore
+AM_LDFLAGS = @FFTW3_LIBS@
 # S2HAT options
 AM_CFLAGS += -Dx86_64 -D@WITH_FFT@ -DOPEN_MPI
 AM_FCFLAGS += $(DD)x86_64 $(DD)@WITH_FFT@ $(DD)OPEN_MPI

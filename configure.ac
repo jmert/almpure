@@ -23,7 +23,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AM_SILENT_RULES([yes])
 AM_PROG_AR
 LT_INIT
-
+PKG_PROG_PKG_CONFIG
 
 
 SECTION_TITLE([Configuring C MPI])
@@ -41,6 +41,7 @@ AX_MPI([], [AC_ERROR([A Fortran MPI compiler is required])])
 AC_FC_FREEFORM
 AC_FC_LINE_LENGTH([unlimited])
 AC_FC_PP_DEFINE
+AC_FC_MODULE_FLAG
 AC_FC_MODULE_EXTENSION
 AC_FC_LIBRARY_LDFLAGS
 AC_LANG_POP(Fortran)
@@ -51,65 +52,62 @@ dnl For the rest of the configuring, go back to using a C compiler
 AC_LANG(C)
 
 SECTION_TITLE([Configuring FFT libraries])
-AC_ARG_WITH([healpix],
-    [AS_HELP_STRING([--with-healpix],[use the HEALPix FFT library @<:@default=yes@:>@])],
-    [],
-    [with_healpix=yes])
-AC_ARG_WITH([fftw3],
-    [AS_HELP_STRING([--with-fftw3],[use the FFTW3 FFT library @<:@default=yes@:>@])],
-    [],
-    [with_fftw3=yes])
-
-dnl Check for appropriate libraries given the choice of FFT package requested.
-dnl By default we check for all available options, but prefer to use libfftw3
-dnl with full complex support by overriding in order each time a check
-dnl succeeds.
-
-dnl The S2HAT preprocessor define to use
-WITH_FFT=
-dnl Appropriate flags for each choice of FFT library
-FFT_CFLAGS=
-FFT_LIBS=
-
-have_healpix=no
-AS_IF([test x"$with_healpix" != xno],
-    [AC_CHECK_LIB([healpix],[healpix_fft],
-        [have_healpix=yes
-         FFT_LIBS=-lhealpix
-         WITH_FFT=HEALPIX_fft
-         AC_DEFINE([HAVE_HEALPIX], [1], [Define if you have libhealpix])
+PKG_CHECK_MODULES([FFTW3], [fftw3])
+AC_SUBST([FFTW3_CFLAGS])
+AC_SUBST([FFTW3_LIBS])
+dnl For at least gfortran, a default include search path isn't used, so even
+dnl if fftw3.f is in the system include directory, the following checks can
+dnl still fail.
+dnl
+dnl FFTW3_CFLAGS will be empty if it's installed to the standard location, so
+dnl in this case manually create a FFTW3_FCFLAGS variable that just gets the
+dnl prefix from pkg-config. Otherwise, copy from FFTW3_CFLAGS.
+AC_ARG_VAR([FFTW3_FCFLAGS], [Fortran compiler flags for FFTW3])
+AS_IF([test -z "$FFTW3_FCFLAGS"], [
+    dnl Try to construct FFTW3_FCFLAGS manually
+    AS_IF([test -z "$FFTW3_CFLAGS"],
+        [
+            dnl Get the prefix from pkg-config and append "/include" to the
+            dnl path as an initial guess.
+            FFTW3_FCFLAGS=`$PKG_CONFIG --variable=prefix fftw3 2>/dev/null`
+            FFTW3_FCFLAGS="$ac_cv_fc_module_flag$FFTW3_FCFLAGS/include"
         ],
-        [])],
-    [])
-have_fftw3=no
-have_fftw3_c2r=no
-have_fftw3_hc2r=no
-AS_IF([test x"$with_fftw3" != xno],
+        [
+            dnl This probably isn't quite right since the Fortran compiler
+            dnl doesn't necessarily share the flag format with the C compiler.
+            FFTW3_FCFLAGS="$FFTW3_CFLAGS"
+        ])
+    ])
+AC_SUBST([FFTW3_FCFLAGS])
+AC_LANG_PUSH(Fortran)
+
+dnl Make sure fftw3.f can be included
+AC_MSG_CHECKING([for fftw3.f])
+save_FCFLAGS="$FCFLAGS"
+FCFLAGS="$save_FCFLAGS $FFTW3_FCFLAGS"
+have_fftw3_f=no
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([], [include "fftw3.f"])],
+    [have_fftw3_f=yes],
+    [have_fftw3_f=no])
+AC_MSG_RESULT([$have_fftw3_f])
+AS_IF([test x"$have_fftw3_f" != xyes],
+    [AC_MSG_ERROR([Could not find fftw3.f])])
+FCFLAGS="$save_FCFLAGS"
+
+dnl Now figure out which set of API bindings s2hat has available to work with.
+WITH_FFT=unknown
+with_fft_name="full complex"
+AC_CHECK_LIB([fftw3],[dfftw_plan_dft_c2r],
+    [WITH_FFT=FFTW3_C2R],
     [
-     AC_CHECK_LIB([fftw3],[fftw_plan_dft_hc2r],
-        [have_fftw3=yes
-         have_fftw3_hc2r=yes
-         FFT_LIBS=-lfftw3
-         WITH_FFT=FFTW3_HC2R
-         AC_DEFINE([HAVE_FFTW3], [1], [Define if you have libfftw3])
-        ],
-        [])
-     AC_CHECK_LIB([fftw3],[fftw_plan_dft_c2r],
-        [have_fftw3=yes
-         have_fftw3_c2r=yes
-         FFT_LIBS=-lfftw3
-         WITH_FFT=FFTW3_C2R
-         AC_DEFINE([HAVE_FFTW3], [1], [Define if you have libfftw3])
-        ],
-        [])
-    ],
-    [])
-
-AS_IF([test x"$have_healpix" == xno -a x"$have_fftw3" == xno],
-    [AC_MSG_ERROR([no FFT library enabled and-or found])],
-    [])
-AC_SUBST([FFT_CFLAGS])
-AC_SUBST([FFT_LIBS])
+        AC_CHECK_LIB([fftw3],[dfftw_plan_dft_hc2r],
+            [WITH_FFT=FFTW3_HC2R])
+        with_fft_name="half complex"
+    ])
+AS_IF([test x"$WITH_FFT" == x"unknown"],
+    AC_MSG_ERROR([Unable to determine half- or full-complex support in libfftw3])])
+AC_LANG_POP(Fortran)
 AC_SUBST([WITH_FFT])
 
 
@@ -119,16 +117,26 @@ AC_CONFIG_FILES([
     s2hat/Makefile
     ])
 AC_OUTPUT
+echo "" >&AS_MESSAGE_FD
 
-echo "CC      = $CC" >&AS_MESSAGE_FD
-echo "MPICC   = $MPICC" >&AS_MESSAGE_FD
-echo "CFLAGS  = $CFLAGS $FFT_CFLAGS" >&AS_MESSAGE_FD
-echo "FC      = $FC" >&AS_MESSAGE_FD
-echo "MPIFC   = $MPIFC" >&AS_MESSAGE_FD
-echo "FLIBS   = $FLIBS" >&AS_MESSAGE_FD
-echo "FCLIBS  = $FCLIBS" >&AS_MESSAGE_FD
-echo "FCFLAGS = $FCFLAGS" >&AS_MESSAGE_FD
-echo "MPILIBS = $MPILIBS" >&AS_MESSAGE_FD
-echo "LDFLAGS = $LDFLAGS" >&AS_MESSAGE_FD
-echo "LIBS    = $FFT_LIBS" >&AS_MESSAGE_FD
+echo " ---- Compiler summary ----" >&AS_MESSAGE_FD
+echo "C compiler             = $CC" >&AS_MESSAGE_FD
+echo "Fortran compiler       = $FC" >&AS_MESSAGE_FD
+echo "C compiler flags       = $CFLAGS" >&AS_MESSAGE_FD
+echo "Fortran compiler flags = $FCFLAGS" >&AS_MESSAGE_FD
+echo "Linker flags           = $LDFLAGS" >&AS_MESSAGE_FD
+echo "Fortran linking flags  = $FCLIBS" >&AS_MESSAGE_FD
+echo "" >&AS_MESSAGE_FD
 
+echo " ---- MPI summary ----" >&AS_MESSAGE_FD
+echo "MPI C compiler       = $MPICC" >&AS_MESSAGE_FD
+echo "MPI Fortran compiler = $MPIFC" >&AS_MESSAGE_FD
+echo "MPI linker flags     = $MPILIBS" >&AS_MESSAGE_FD
+echo "" >&AS_MESSAGE_FD
+
+echo " ---- FFTW3 summary ----" >&AS_MESSAGE_FD
+echo "FFTW3 compiler flags = $FFTW3_CFLAGS" >&AS_MESSAGE_FD
+echo "FFTW3 Fortran flags  = $FFTW3_FCFLAGS" >&AS_MESSAGE_FD
+echo "FFTW3 linker flags   = $FFTW3_LIBS" >&AS_MESSAGE_FD
+echo "FFTW3 bindings style = $with_fft_name" >&AS_MESSAGE_FD
+echo "" >&AS_MESSAGE_FD
