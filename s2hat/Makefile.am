@@ -2,17 +2,27 @@
 # support parallel builds in this directory. Disable parallel building.
 .NOTPARALLEL:
 
-CC = @MPICC@
-FC = @MPIFC@
-DD = @FC_DEFINE@
-
 # Generic build options
+AM_CPPFLAGS =
 AM_CFLAGS = @FFTW3_CFLAGS@
 AM_FCFLAGS = @FFTW3_FCFLAGS@ -fno-second-underscore
 AM_LDFLAGS = @FFTW3_LIBS@
 # S2HAT options
 AM_CFLAGS += -Dx86_64 -D@WITH_FFT@ -DOPEN_MPI
 AM_FCFLAGS += $(DD)x86_64 $(DD)@WITH_FFT@ $(DD)OPEN_MPI
+
+if USE_MPISTUB
+AM_CPPFLAGS += -I$(top_builddir)/mpistub
+AM_FCFLAGS += -I$(top_builddir)/mpistub
+AM_LDFLAGS += -L$(top_builddir)/mpistub -lmpi_stubs
+endif #USE_MPISTUB
+
+# This is always OK since we set MPICC and MPIFC to CC and FC, respectively,
+# for the MPI stub case.
+CC = @MPICC@
+FC = @MPIFC@
+# Shortcut for how to pass define flags to the Fortran compiler
+DD = @FC_DEFINE@
 
 lib_LTLIBRARIES = libs2hat.la
 
