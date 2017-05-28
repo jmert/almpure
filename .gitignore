@@ -23,19 +23,21 @@
 /stamp-h1
 /Makefile
 /Makefile.in
+/mpistub/Makefile
+/mpistub/Makefile.in
 /s2hat/Makefile
 /s2hat/Makefile.in
 
 # Ignore build products
-/s2hat/*.a
-/s2hat/*.la
-/s2hat/*.lo
-/s2hat/*.mod
-/s2hat/*.o
-/s2hat/*.obj
-/s2hat/*.so*
-/s2hat/.deps/
-/s2hat/.libs/
+/*/*.a
+/*/*.la
+/*/*.lo
+/*/*.mod
+/*/*.o
+/*/*.obj
+/*/*.so*
+/*/.deps/
+/*/.libs/
 
 # Ignore the distributable tar file
 /almpure-*.tar.gz

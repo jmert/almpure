@@ -1,3 +1,10 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = s2hat
+SUBDIRS =
+
+if USE_MPISTUB
+SUBDIRS += mpistub
+endif #USE_MPISTUB
+
+SUBDIRS += s2hat
+

@@ -26,26 +26,52 @@ LT_INIT
 PKG_PROG_PKG_CONFIG
 
 
-SECTION_TITLE([Configuring C MPI])
+SECTION_TITLE([Configuring C])
 AC_LANG_PUSH(C)
 AC_PROG_CC
-AX_MPI([], [AC_ERROR([A C MPI compiler is required])])
 AC_LANG_POP(C)
 
 
 
-SECTION_TITLE([Configuring Fortran MPI])
+SECTION_TITLE([Configuring Fortran])
 AC_LANG_PUSH(Fortran)
 AC_PROG_FC
-AX_MPI([], [AC_ERROR([A Fortran MPI compiler is required])])
 AC_FC_FREEFORM
 AC_FC_LINE_LENGTH([unlimited])
 AC_FC_PP_DEFINE
 AC_FC_MODULE_FLAG
 AC_FC_MODULE_EXTENSION
 AC_FC_LIBRARY_LDFLAGS
-AC_LANG_POP(Fortran)
 AM_CONDITIONAL([KNOWN_MODEXT], [test x"$FC_MODEXT" != x""])
+AC_LANG_POP(Fortran)
+
+
+
+AC_ARG_WITH([mpi-stub],
+    [AS_HELP_STRING([--with-mpi-stub],[use a stub MPI implementation @<:@default=no@:>@])],
+    [],
+    [with_mpi_stub=no])
+AM_CONDITIONAL([USE_MPISTUB], [test x"$with_mpi_stub" == xyes])
+AS_IF([test x"$with_mpi_stub" == xyes],
+    [
+        AC_SUBST([USE_MPISTUB],[1],[Define if using a stub MPI implementation])
+        MPICC="$CC"
+        MPIFC="$FC"
+        AC_SUBST(MPICC)
+        AC_SUBST(MPIFC)
+    ],
+    [
+        SECTION_TITLE([Configuring MPI])
+
+        AC_LANG_PUSH(C)
+        AX_MPI([], [AC_ERROR([A C MPI compiler is required])])
+        AC_LANG_POP(C)
+
+        AC_LANG_PUSH(Fortran)
+        AX_MPI([], [AC_ERROR([A Fortran MPI compiler is required])])
+        AC_LANG_POP(Fortran)
+    ])
+
 
 
 dnl For the rest of the configuring, go back to using a C compiler
@@ -116,27 +142,30 @@ AC_CONFIG_FILES([
     Makefile
     s2hat/Makefile
     ])
+AS_IF([test x"$with_mpi_stub" == xyes],[AC_CONFIG_FILES([mpistub/Makefile])], [])
 AC_OUTPUT
-echo "" >&AS_MESSAGE_FD
+AS_ECHO("") >&AS_MESSAGE_FD
 
-echo " ---- Compiler summary ----" >&AS_MESSAGE_FD
-echo "C compiler             = $CC" >&AS_MESSAGE_FD
-echo "Fortran compiler       = $FC" >&AS_MESSAGE_FD
-echo "C compiler flags       = $CFLAGS" >&AS_MESSAGE_FD
-echo "Fortran compiler flags = $FCFLAGS" >&AS_MESSAGE_FD
-echo "Linker flags           = $LDFLAGS" >&AS_MESSAGE_FD
-echo "Fortran linking flags  = $FCLIBS" >&AS_MESSAGE_FD
-echo "" >&AS_MESSAGE_FD
+AS_ECHO(" ---- Compiler summary ----") >&AS_MESSAGE_FD
+AS_ECHO("C compiler             = $CC") >&AS_MESSAGE_FD
+AS_ECHO("Fortran compiler       = $FC") >&AS_MESSAGE_FD
+AS_ECHO("C compiler flags       = $CFLAGS") >&AS_MESSAGE_FD
+AS_ECHO("Fortran compiler flags = $FCFLAGS") >&AS_MESSAGE_FD
+AS_ECHO("Linker flags           = $LDFLAGS") >&AS_MESSAGE_FD
+AS_ECHO("Fortran linking flags  = $FCLIBS") >&AS_MESSAGE_FD
+AS_ECHO("") >&AS_MESSAGE_FD
 
-echo " ---- MPI summary ----" >&AS_MESSAGE_FD
-echo "MPI C compiler       = $MPICC" >&AS_MESSAGE_FD
-echo "MPI Fortran compiler = $MPIFC" >&AS_MESSAGE_FD
-echo "MPI linker flags     = $MPILIBS" >&AS_MESSAGE_FD
-echo "" >&AS_MESSAGE_FD
+AS_IF([test x"$with_mpi_stub" != xyes], [
+    AS_ECHO(" ---- MPI summary ----") >&AS_MESSAGE_FD
+    AS_ECHO("MPI C compiler       = $MPICC") >&AS_MESSAGE_FD
+    AS_ECHO("MPI Fortran compiler = $MPIFC") >&AS_MESSAGE_FD
+    AS_ECHO("MPI linker flags     = $MPILIBS") >&AS_MESSAGE_FD
+    AS_ECHO("") >&AS_MESSAGE_FD
+])
 
-echo " ---- FFTW3 summary ----" >&AS_MESSAGE_FD
-echo "FFTW3 compiler flags = $FFTW3_CFLAGS" >&AS_MESSAGE_FD
-echo "FFTW3 Fortran flags  = $FFTW3_FCFLAGS" >&AS_MESSAGE_FD
-echo "FFTW3 linker flags   = $FFTW3_LIBS" >&AS_MESSAGE_FD
-echo "FFTW3 bindings style = $with_fft_name" >&AS_MESSAGE_FD
-echo "" >&AS_MESSAGE_FD
+AS_ECHO(" ---- FFTW3 summary ----") >&AS_MESSAGE_FD
+AS_ECHO("FFTW3 compiler flags = $FFTW3_CFLAGS") >&AS_MESSAGE_FD
+AS_ECHO("FFTW3 Fortran flags  = $FFTW3_FCFLAGS") >&AS_MESSAGE_FD
+AS_ECHO("FFTW3 linker flags   = $FFTW3_LIBS") >&AS_MESSAGE_FD
+AS_ECHO("FFTW3 bindings style = $with_fft_name") >&AS_MESSAGE_FD
+AS_ECHO("") >&AS_MESSAGE_FD
