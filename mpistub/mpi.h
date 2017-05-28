@@ -57,6 +57,7 @@ int MPI_Comm_free ( MPI_Comm *comm );
 int MPI_Comm_rank ( MPI_Comm comm, int *me );
 int MPI_Comm_size ( MPI_Comm comm, int *nprocs );
 int MPI_Comm_split ( MPI_Comm comm, int icolor, int ikey, MPI_Comm *new_comm );
+int MPI_Comm_c2f ( MPI_Comm comm );
 int mpi_copy_byte ( char *data1, char *data2, int n );
 int mpi_copy_double ( double *data1, double *data2, int n );
 int mpi_copy_float ( float *data1, float *data2, int n );
