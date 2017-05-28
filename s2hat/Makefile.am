@@ -4,8 +4,8 @@
 
 # Generic build options
 AM_CPPFLAGS =
-AM_CFLAGS = @FFTW3_CFLAGS@
-AM_FCFLAGS = @FFTW3_FCFLAGS@ -fno-second-underscore
+AM_CFLAGS = @FFTW3_CFLAGS@ -fPIC
+AM_FCFLAGS = @FFTW3_FCFLAGS@ -fPIC -fno-second-underscore
 AM_LDFLAGS = @FFTW3_LIBS@
 # S2HAT options
 AM_CFLAGS += -Dx86_64 -D@WITH_FFT@ -DOPEN_MPI

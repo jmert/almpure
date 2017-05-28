@@ -65,6 +65,7 @@ int mpi_copy_int ( int *data1, int *data2, int n );
 int MPI_Finalize ( void );
 int MPI_Get_count ( MPI_Status status, MPI_Datatype datatype, int icount );
 int MPI_Init ( int *argc, char **argv[] );
+int MPI_Initialized( int *flag );
 int MPI_Irecv ( void *buf, int count, MPI_Datatype datatype,
   int source, int tag, MPI_Comm comm, MPI_Request *request );
 int MPI_Isend ( void *buf, int count, MPI_Datatype datatype,

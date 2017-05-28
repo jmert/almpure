@@ -23,6 +23,8 @@
 /stamp-h1
 /Makefile
 /Makefile.in
+/matlab/Makefile
+/matlab/Makefile.in
 /mpistub/Makefile
 /mpistub/Makefile.in
 /s2hat/Makefile

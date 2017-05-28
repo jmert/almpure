@@ -54,7 +54,7 @@ AC_ARG_WITH([mpi-stub],
 AM_CONDITIONAL([USE_MPISTUB], [test x"$with_mpi_stub" == xyes])
 AS_IF([test x"$with_mpi_stub" == xyes],
     [
-        AC_SUBST([USE_MPISTUB],[1],[Define if using a stub MPI implementation])
+        WITH_MPISTUB=true
         MPICC="$CC"
         MPIFC="$FC"
         AC_SUBST(MPICC)
@@ -62,6 +62,7 @@ AS_IF([test x"$with_mpi_stub" == xyes],
     ],
     [
         SECTION_TITLE([Configuring MPI])
+        WITH_MPISTUB=false
 
         AC_LANG_PUSH(C)
         AX_MPI([], [AC_ERROR([A C MPI compiler is required])])
@@ -137,12 +138,31 @@ AC_LANG_POP(Fortran)
 AC_SUBST([WITH_FFT])
 
 
+
+AC_ARG_ENABLE([matlab],
+    [AS_HELP_STRING([--enable-matlab],[build Matlab MEX @<:@default=no@:>@])],
+    [enable_matlab=$enableval], [enable_matlab=])
+AS_IF([test -n "$enable_matlab"],
+    [
+        SECTION_TITLE([Configure Matlab])
+        WITH_MATLAB=true
+        AC_ARG_VAR([MEX], [Matlab MEX compiler command])
+        AC_PATH_PROG([MEX], [mex], [not found])
+        AS_IF([test x"$MEX" == x"not found"], [WITH_MATLAB=false])
+    ],
+    [
+        WITH_MATLAB=false
+    ])
+AM_CONDITIONAL([HAVE_MATLAB], [$WITH_MATLAB])
+AS_IF([$WITH_MATLAB], [mex_summary=yes], [mex_summary=no])
+
 SECTION_TITLE([Configuration results])
 AC_CONFIG_FILES([
     Makefile
     s2hat/Makefile
     ])
-AS_IF([test x"$with_mpi_stub" == xyes],[AC_CONFIG_FILES([mpistub/Makefile])], [])
+AS_IF([$WITH_MPISTUB],[AC_CONFIG_FILES([mpistub/Makefile])])
+AS_IF([$WITH_MATLAB], [AC_CONFIG_FILES([matlab/Makefile])])
 AC_OUTPUT
 AS_ECHO("") >&AS_MESSAGE_FD
 
@@ -168,4 +188,8 @@ AS_ECHO("FFTW3 compiler flags = $FFTW3_CFLAGS") >&AS_MESSAGE_FD
 AS_ECHO("FFTW3 Fortran flags  = $FFTW3_FCFLAGS") >&AS_MESSAGE_FD
 AS_ECHO("FFTW3 linker flags   = $FFTW3_LIBS") >&AS_MESSAGE_FD
 AS_ECHO("FFTW3 bindings style = $with_fft_name") >&AS_MESSAGE_FD
+AS_ECHO("") >&AS_MESSAGE_FD
+
+AS_ECHO(" ---- Bindings summary ----") >&AS_MESSAGE_FD
+AS_ECHO("Building Matlab bindings = $mex_summary")
 AS_ECHO("") >&AS_MESSAGE_FD

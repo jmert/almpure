@@ -6,7 +6,7 @@
 
 .PHONY: convenience-link clean-convenience-link
 
-convenience-link: $(lib_LTLIBRARIES)
+convenience-link: $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 	$(AM_V_at)for soname in `echo | $(EGREP) "^(dlname|old_library)=" $^ | $(SED) -e "s#^\(dlname\|old_library\)='\(.*\)'#\2#"`; do  \
 		rm -f $(builddir)/$$soname; \
 		test -e $(builddir)/.libs/$$soname && \

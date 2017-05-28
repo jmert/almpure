@@ -1235,6 +1235,47 @@ int MPI_Init ( int *argc, char **argv[] )
 }
 /******************************************************************************/
 
+int MPI_Initialized ( int *flag )
+
+/******************************************************************************/
+/*
+  Purpose:
+
+    Indicates whether MPI_Init has been called
+
+  Licensing:
+
+    This code is distributed under the GNU LGPL license. 
+
+  Modified:
+
+    28 May 2017
+
+  Author:
+
+    Justin Willmert
+
+  Reference:
+
+    William Gropp, Ewing Lusk, Anthony Skjellum,
+    Using MPI: Portable Parallel Programming with the Message-Passing Interface,
+    Second Edition,
+    MIT Press, 1999,
+    ISBN: 0262571323,
+    LC: QA76.642.G76.
+
+  Parameters:
+
+    Output, int IERROR, is nonzero if an error occurred.
+*/
+{
+  int ierror;
+  *flag = 1;
+  ierror = MPI_SUCCESS;
+  return ierror;
+}
+/******************************************************************************/
+
 int MPI_Irecv ( void *buf, int count, MPI_Datatype datatype,
   int source, int tag, MPI_Comm comm, MPI_Request *request )
 

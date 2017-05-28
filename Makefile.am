@@ -1,10 +1,12 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS =
-
 if USE_MPISTUB
-SUBDIRS += mpistub
-endif #USE_MPISTUB
+  BUILD_MPISTUB = mpistub
+endif
 
-SUBDIRS += s2hat
+if HAVE_MATLAB
+  BUILD_MATLAB = matlab
+endif
+
+SUBDIRS = $(BUILD_MPISTUB) s2hat $(BUILD_MATLAB)
 
