@@ -22,7 +22,6 @@ AC_CONFIG_MACRO_DIRS([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AM_SILENT_RULES([yes])
 AM_PROG_AR
-LT_INIT
 PKG_PROG_PKG_CONFIG
 
 
@@ -55,10 +54,6 @@ AM_CONDITIONAL([USE_MPISTUB], [test x"$with_mpi_stub" == xyes])
 AS_IF([test x"$with_mpi_stub" == xyes],
     [
         WITH_MPISTUB=true
-        MPICC="$CC"
-        MPIFC="$FC"
-        AC_SUBST(MPICC)
-        AC_SUBST(MPIFC)
     ],
     [
         SECTION_TITLE([Configuring MPI])
@@ -66,12 +61,23 @@ AS_IF([test x"$with_mpi_stub" == xyes],
 
         AC_LANG_PUSH(C)
         AX_MPI([], [AC_ERROR([A C MPI compiler is required])])
+        CC="$MPICC"
         AC_LANG_POP(C)
 
         AC_LANG_PUSH(Fortran)
         AX_MPI([], [AC_ERROR([A Fortran MPI compiler is required])])
+        FC="$MPIFC"
         AC_LANG_POP(Fortran)
     ])
+
+
+dnl Configure libtool after the MPI compilers have been setup. Because of how
+dnl libtool works, the linking compiler is set during configuration rather
+dnl than as an environment variable during make. Therefore, the only way to
+dnl get the correct MPI libraries linked into the shared libs2hat is to set
+dnl the linking compilers *after* MPI setup.
+SECTION_TITLE([Configuring libtool linking])
+LT_INIT([shared static pic-only])
 
 
 
@@ -174,14 +180,6 @@ AS_ECHO("Fortran compiler flags = $FCFLAGS") >&AS_MESSAGE_FD
 AS_ECHO("Linker flags           = $LDFLAGS") >&AS_MESSAGE_FD
 AS_ECHO("Fortran linking flags  = $FCLIBS") >&AS_MESSAGE_FD
 AS_ECHO("") >&AS_MESSAGE_FD
-
-AS_IF([test x"$with_mpi_stub" != xyes], [
-    AS_ECHO(" ---- MPI summary ----") >&AS_MESSAGE_FD
-    AS_ECHO("MPI C compiler       = $MPICC") >&AS_MESSAGE_FD
-    AS_ECHO("MPI Fortran compiler = $MPIFC") >&AS_MESSAGE_FD
-    AS_ECHO("MPI linker flags     = $MPILIBS") >&AS_MESSAGE_FD
-    AS_ECHO("") >&AS_MESSAGE_FD
-])
 
 AS_ECHO(" ---- FFTW3 summary ----") >&AS_MESSAGE_FD
 AS_ECHO("FFTW3 compiler flags = $FFTW3_CFLAGS") >&AS_MESSAGE_FD

@@ -1,14 +1,11 @@
 SUFFIXES = .mexa64
 
-if USE_MPISTUB
 MEXCC = @CC@
 MEXFC = @FC@
 MEXLD = @FC@
+if USE_MPISTUB
 MPIFLAGS = -I$(top_builddir)/mpistub -L$(top_builddir)/mpistub -lmpi_stubs
 else
-MEXCC = @MPICC@
-MEXFC = @MPIFC@
-MEXLD = @MPIFC@
 MPIFLAGS =
 endif #USE_MPISTUB
 
