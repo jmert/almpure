@@ -5,52 +5,60 @@
 ## Getting Started
 
 ### Downloading
-Clone this repository to a local directory:
+
+Either download a release tarball from
+https://github.com/jmert/almpure/releases or clone the git repository:
 
 ```bash
 $ git clone https://github.com/jmert/almpure
 ```
 
+### Prerequisites
+
+If starting from git sources, the following will be required to bootstrap
+the build system:
+
+- The GNU Autotools
+- `pkg-config`
+
+Generic build dependencies then include:
+
+- A `make` build tool.
+- An MPI library implementation.
+- The FFTW3 library.
+- C and Fortran compilers.
+
+> At present, only OpenMPI has been tested, though other compliant MPI
+> implementations should work as well.
+
+Optional components include:
+
+- Matlab to build MEX “all-in-one” function wrappers.
+  * A static FFTW3 library is required for MEX compilation.
+
 ### Compiling
 
-An MPI compiler is required to compile the (P)S2HAT library. At present, only
-OpenMPI has been tested, though other compliant MPI implementations should
-work as well.
-
-On some systems (such as Harvard's Odyssey cluster), this software is provided
-in loadable modules. The support directory contains small shell scripts which
-can be sourced in the shell to load up the correct environment. For example,
-on Odyssey,
-
-```bash
-$ cd almpure
-$ source support/odyssey_env.sh
-```
-
-Then configure and compile the library:
+To bootstrap the build system from git sources,
 
 ```bash
 $ autoreconf -vi
-$ ./configure
-$ make
 ```
 
-### Compiling Matlab bindings
-
-To build the Matlab MEX bindings, the following conditions must be met:
-
-1. Matlab available with a MEX compiler.
-2. A static FFTW library. (The dynamic FFTW library used when compiling
-   the PS2HAT library conflicts with Matlab's internal library, so use
-   of the static library instead works around this.)
-
-The bindings can be built with
+Next (or for a release tarball), configure and build the library. For example,
+for home directory install without the Matlab MEX bindings:
 
 ```bash
-$ make matlab
+$ ./configure --without-matlab --prefix=$HOME/local/almpure
+$ make && make install
 ```
 
-> At this time, only use with Matlab 2016b has been tested.
+More options can be discovered via
+
+```bash
+$ ./configure --help
+```
+
+which will show other available configuration options and variables.
 
 [1]: http://www.apc.univ-paris7.fr/APC_CS/Recherche/Adamis/MIDAS09/software/s2hat/s2hat.html
 [2]: http://www.apc.univ-paris7.fr/APC_CS/Recherche/Adamis/MIDAS09/software/pures2hat/pureS2HAT.html

@@ -1,4 +1,4 @@
-AC_INIT([almpure], [0.1])
+AC_INIT([almpure], [1.0])
 AC_CONFIG_AUX_DIR([config])
 
 dnl Take some tricks from
@@ -45,11 +45,12 @@ AM_CONDITIONAL([KNOWN_MODEXT], [test x"$FC_MODEXT" != x""])
 AC_LANG_POP(Fortran)
 
 
-
-AC_ARG_WITH([mpi-stub],
-    [AS_HELP_STRING([--with-mpi-stub],[use a stub MPI implementation @<:@default=no@:>@])],
-    [],
-    [with_mpi_stub=no])
+dnl Disabled for release build. Not verified to work correctly yet.
+dnl
+dnl AC_ARG_WITH([mpi-stub],
+dnl     [AS_HELP_STRING([--with-mpi-stub],[use a stub MPI implementation @<:@default=no@:>@])],
+dnl     [],
+dnl     [with_mpi_stub=no])
 AM_CONDITIONAL([USE_MPISTUB], [test x"$with_mpi_stub" == xyes])
 AS_IF([test x"$with_mpi_stub" == xyes],
     [
