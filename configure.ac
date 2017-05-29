@@ -147,8 +147,8 @@ AC_SUBST([WITH_FFT])
 
 AC_ARG_ENABLE([matlab],
     [AS_HELP_STRING([--enable-matlab],[build Matlab MEX @<:@default=no@:>@])],
-    [enable_matlab=$enableval], [enable_matlab=])
-AS_IF([test -n "$enable_matlab"],
+    [enable_matlab=$enableval], [enable_matlab=no])
+AS_IF([test x"$enable_matlab" != xno],
     [
         SECTION_TITLE([Configure Matlab])
         WITH_MATLAB=true
@@ -162,13 +162,15 @@ AS_IF([test -n "$enable_matlab"],
 AM_CONDITIONAL([HAVE_MATLAB], [$WITH_MATLAB])
 AS_IF([$WITH_MATLAB], [mex_summary=yes], [mex_summary=no])
 
+
+
 SECTION_TITLE([Configuration results])
 AC_CONFIG_FILES([
     Makefile
+    matlab/Makefile
+    mpistub/Makefile
     s2hat/Makefile
     ])
-AS_IF([$WITH_MPISTUB],[AC_CONFIG_FILES([mpistub/Makefile])])
-AS_IF([$WITH_MATLAB], [AC_CONFIG_FILES([matlab/Makefile])])
 AC_OUTPUT
 AS_ECHO("") >&AS_MESSAGE_FD
 
