@@ -21,25 +21,19 @@
 /m4/ltversion.m4
 /m4/lt~obsolete.m4
 /stamp-h1
-/Makefile
-/Makefile.in
-/matlab/Makefile
-/matlab/Makefile.in
-/mpistub/Makefile
-/mpistub/Makefile.in
-/s2hat/Makefile
-/s2hat/Makefile.in
+**/Makefile
+**/Makefile.in
 
 # Ignore build products
-/*/*.a
-/*/*.la
-/*/*.lo
-/*/*.mod
-/*/*.o
-/*/*.obj
-/*/*.so*
-/*/.deps/
-/*/.libs/
+**/*.a
+**/*.la
+**/*.lo
+**/*.mod
+**/*.o
+**/*.obj
+**/*.so*
+**/.deps/
+**/.libs/
 
 # Ignore the distributable tar file
 /almpure-*.tar.gz

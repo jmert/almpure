@@ -1,0 +1,21 @@
+from distutils.core import setup
+from distutils.extension import Extension
+from Cython.Build import cythonize
+import numpy
+import os
+
+os.environ["CC"] = "@CC@"
+os.environ["LDSHARED"] = "@FC@ -shared"
+
+extensions = [
+    Extension("almpure", ["almpure.pyx"],
+        include_dirs = ["@top_srcdir@/s2hat", numpy.get_include()],
+        library_dirs = ["@top_builddir@/s2hat"],
+        libraries = ["s2hat","fftw3"]
+    )
+]
+
+setup(
+    name = 'almpure Python bindings',
+    ext_modules = cythonize(extensions),
+)

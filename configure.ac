@@ -1,4 +1,5 @@
 AC_INIT([almpure], [1.0])
+AC_PREREQ([2.62])
 AC_CONFIG_AUX_DIR([config])
 
 dnl Take some tricks from
@@ -161,13 +162,44 @@ AS_IF([test x"$enable_matlab" != xno],
         WITH_MATLAB=false
     ])
 AM_CONDITIONAL([HAVE_MATLAB], [$WITH_MATLAB])
-AS_IF([$WITH_MATLAB], [mex_summary=yes], [mex_summary=no])
+AS_IF([$WITH_MATLAB], [mex_summary="yes ($MEX)"], [mex_summary=no])
+
+
+
+AC_ARG_ENABLE([cython],
+    [AS_HELP_STRING([--enable-cython],[build Cython binding @<:@default=no@:>@])],
+    [enable_cython=$enableval], [enable_cython=no])
+AS_IF([test x"$enable_cython" != xno],
+    [
+        SECTION_TITLE([Configure Python])
+        WITH_CYTHON=true
+        AC_ARG_VAR([PYTHON], [Python command])
+        AC_MSG_CHECKING([for python with the cython module])
+        AC_PATH_PROGS_FEATURE_CHECK([PYTHON], [python python3 python2], [
+            $ac_path_PYTHON -c 'import cython'
+            AS_IF([test $? -eq 0], [
+                ac_cv_path_PYTHON=$ac_path_PYTHON
+                ac_path_PYTHON_found=:
+                AC_MSG_RESULT([$ac_cv_path_PYTHON])
+            ])
+        ], [
+            AC_MSG_RESULT([no])
+            WITH_CYTHON=false
+        ])
+    ],[
+        WITH_CYTHON=false
+    ])
+AC_SUBST([PYTHON], [$ac_cv_path_PYTHON])
+AM_CONDITIONAL([HAVE_CYTHON], [$WITH_CYTHON])
+AS_IF([$WITH_CYTHON], [python_summary="yes ($PYTHON)"], [python_summary=no])
 
 
 
 SECTION_TITLE([Configuration results])
 AC_CONFIG_FILES([
     Makefile
+    cython/setup.py
+    cython/Makefile
     matlab/Makefile
     mpistub/Makefile
     s2hat/Makefile
@@ -193,4 +225,5 @@ AS_ECHO("") >&AS_MESSAGE_FD
 
 AS_ECHO(" ---- Bindings summary ----") >&AS_MESSAGE_FD
 AS_ECHO("Building Matlab bindings = $mex_summary")
+AS_ECHO("Building Python bindings = $python_summary")
 AS_ECHO("") >&AS_MESSAGE_FD
