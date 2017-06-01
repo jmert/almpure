@@ -1,3 +1,7 @@
+#ifndef S2HAT_H
+#define S2HAT_H
+
+#include <mpi.h>
 
 /* definitions for the C-interface         */
 /* Radek Stompor (APC) February, 2007      */
@@ -79,3 +83,5 @@ void s2hat_map2alm_spin( s2hat_pixeltype, s2hat_scandef, s2hat_int4, s2hat_int4,
 /* plm calculation */
 
 void plm_mvalues_gen( s2hat_pixeltype, s2hat_scandef, s2hat_int4, s2hat_int4, s2hat_int4, s2hat_int4, s2hat_int4*, s2hat_int4, s2hat_int8, s2hat_flt8*);
+
+#endif /* S2HAT_H */

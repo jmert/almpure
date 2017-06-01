@@ -1,3 +1,7 @@
+#ifndef S2HAT_PURE_H
+#define S2HAT_PURE_H
+
+#include <s2hat.h>
 
 /* version of January, 01, 2010 - rs@apc */
 
@@ -14,3 +18,5 @@ s2hat_int4 s2hat_map2purealm( s2hat_pixeltype, s2hat_scandef, s2hat_int4, s2hat_
 							  s2hat_int4, s2hat_int4, MPI_Comm);
 
 void apodize_maps_all( s2hat_int4, s2hat_int4, s2hat_flt8*, s2hat_int4, s2hat_flt8*, s2hat_flt8*, s2hat_flt8*, s2hat_flt8*, s2hat_flt8*, s2hat_flt8*); 
+
+#endif /* S2HAT_PURE_H */
