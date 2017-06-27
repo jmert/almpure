@@ -1,4 +1,4 @@
-AC_INIT([almpure], [1.0])
+AC_INIT([almpure], [1.0.1])
 AC_CONFIG_AUX_DIR([config])
 
 dnl Take some tricks from

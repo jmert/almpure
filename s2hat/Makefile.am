@@ -30,6 +30,7 @@ fmoddir = $(includedir)/s2hat
 
 cinc_HEADERS = \
 	s2hat.h \
+	s2hat_pure.h \
 	s2hat_defs.h \
 	s2hat_f2c.h \
 	s2hat_types.h
